@@ -7,8 +7,8 @@ sealed record Part(Me Me, int Year, int Day, int PartNo, string Input, Immutable
 {
     public async Task<PartResponse> AnswerAsync(string answer)
     {
-        if (Answers.Length >= PartNo && Answers[PartNo - 1] == answer)
-            return new(true, true, true, default, default, default, 0, 0);
+        if (Answers.Length >= PartNo)
+            return new(Answers[PartNo - 1] == answer, Answers[PartNo - 1].Length == answer.Length, Answers[PartNo - 1][0] == answer[0], default, default, default, 0, 0);
 
         using var handler = new HttpClientHandler() { CookieContainer = Me.Cookies };
         using var client = new HttpClient(handler) { BaseAddress = Me.BaseAddress };

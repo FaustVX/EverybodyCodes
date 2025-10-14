@@ -1,5 +1,31 @@
-﻿Console.WriteLine("Hello, World!");
+﻿using System.Reflection;
+using Cocona;
 
-var me = await Me.CreateAsync("");
-var part1 = await me.GetInputAsync(2024, 1, 1);
-var response1 = await part1.AnswerAsync(0.ToString());
+var app = CoconaLiteApp.Create(args);
+
+app.AddCommand("run", async ([Argument] int year, [Argument] int day, [Argument] int part, [Option('s')] string session) =>
+{
+    var me = await Me.CreateAsync(session);
+    var input = await me.GetInputAsync(year, day, part);
+    var type = Assembly.GetEntryAssembly()!.GetType($"Y{year}.D{day:00}.Solution");
+    var solution = (ISolution)Activator.CreateInstance(type!)!;
+    var output = solution.Solve(part, input.Input);
+    var response = await input.AnswerAsync(output);
+    Console.WriteLine(response);
+    return response switch
+    {
+        { IsCorrect: true } => 0,
+        { IsLengthCorrect: true, IsFirstCorrect: true } => 1,
+        { IsFirstCorrect: true } => 2,
+        { IsLengthCorrect: true } => 3,
+        _ => -1,
+    };
+});
+
+app.AddCommand("get", async ([Argument] int year, [Argument] int day, [Option('s')] string session) =>
+{
+    var me = await Me.CreateAsync(session);
+    var input = await me.GetInputAsync(year, day);
+});
+
+app.Run();

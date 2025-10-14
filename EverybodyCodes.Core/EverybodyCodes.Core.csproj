@@ -8,4 +8,9 @@
     <LangVersion>13</LangVersion>
   </PropertyGroup>
 
+  <ItemGroup>
+    <PackageReference Include="ZLinq" Version="1.4.8" />
+    <PackageReference Include="Cocona.Lite" Version="2.2.0" />
+  </ItemGroup>
+
 </Project>

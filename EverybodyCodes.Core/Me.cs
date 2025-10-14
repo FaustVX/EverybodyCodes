@@ -24,11 +24,9 @@ sealed record Me(string Name, int Seed, ImmutableDictionary<int, object?> Badges
 
     public async Task<Part> GetInputAsync(int year, int day, int part)
     {
+        var input = await GetInputAsync(year, day);
         using var handler = new HttpClientHandler() { CookieContainer = Cookies };
         using var client = new HttpClient(handler) { BaseAddress = BaseAddress };
-        using var clientCdn = new HttpClient(handler) { BaseAddress = BaseAddressCdn };
-
-        var input = (await clientCdn.GetFromJsonAsync<Input>($"/assets/{year}/{day}/input/{Seed}.json"))!;
         var keys = (await client.GetFromJsonAsync<Key>($"/api/event/{year}/quest/{day}"))!;
 
         return new(this, year, day, part, DecryptStringFromBytes_Aes(input, keys, part), [
@@ -36,6 +34,34 @@ sealed record Me(string Name, int Seed, ImmutableDictionary<int, object?> Badges
             ..keys.Answer2 is string a2 ? new ReadOnlySpan<string>(ref a2) : [],
             ..keys.Answer3 is string a3 ? new ReadOnlySpan<string>(ref a3) : []
             ]);
+    }
+
+    public async Task<Input> GetInputAsync(int year, int day)
+    {
+        return JsonSerializer.Deserialize<Input>(await GetJson(this, year, day))!;
+
+        static async Task<string> GetJson(Me me, int year, int day)
+        {
+            var path = Path.Combine("EverybodyCodes.Core", $"Y{year}", $"D{day:00}", "input.json");
+            if (File.Exists(path))
+                return File.ReadAllText(path);
+
+            using var handler = new HttpClientHandler() { CookieContainer = me.Cookies };
+            using var clientCdn = new HttpClient(handler) { BaseAddress = BaseAddressCdn };
+
+            var json = (await clientCdn.GetStringAsync($"/assets/{year}/{day}/input/{me.Seed}.json"))!;
+            CreateParentDir(Path.GetDirectoryName(path)!);
+            File.WriteAllText(path, json);
+            return json;
+
+            static void CreateParentDir(string dir)
+            {
+                if (string.IsNullOrWhiteSpace(dir) || Directory.Exists(dir))
+                    return;
+                CreateParentDir(Path.GetDirectoryName(dir)!);
+                Directory.CreateDirectory(dir);
+            }
+        }
     }
 
     private static string DecryptStringFromBytes_Aes(Input input, Key key, int part)
@@ -54,7 +80,7 @@ sealed record Me(string Name, int Seed, ImmutableDictionary<int, object?> Badges
         return srDecrypt.ReadToEnd();
     }
 
-    sealed record Input([property: JsonPropertyName("1"), JsonConverter(typeof(Input.HexStringConverter))] byte[] A, [property: JsonPropertyName("2"), JsonConverter(typeof(Input.HexStringConverter))] byte[] B, [property: JsonPropertyName("3"), JsonConverter(typeof(Input.HexStringConverter))] byte[] C)
+    public sealed record Input([property: JsonPropertyName("1"), JsonConverter(typeof(Input.HexStringConverter))] byte[] A, [property: JsonPropertyName("2"), JsonConverter(typeof(Input.HexStringConverter))] byte[] B, [property: JsonPropertyName("3"), JsonConverter(typeof(Input.HexStringConverter))] byte[] C)
     {
         public byte[] this[int index] => index switch
         {
