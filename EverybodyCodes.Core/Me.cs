@@ -31,7 +31,11 @@ sealed record Me(string Name, int Seed, ImmutableDictionary<int, object?> Badges
         var input = (await clientCdn.GetFromJsonAsync<Input>($"/assets/{year}/{day}/input/{Seed}.json"))!;
         var keys = (await client.GetFromJsonAsync<Key>($"/api/event/{year}/quest/{day}"))!;
 
-        return new(this, year, day, part, DecryptStringFromBytes_Aes(input, keys, part));
+        return new(this, year, day, part, DecryptStringFromBytes_Aes(input, keys, part), [
+            ..keys.Answer1 is string a1 ? new ReadOnlySpan<string>(ref a1) : [],
+            ..keys.Answer2 is string a2 ? new ReadOnlySpan<string>(ref a2) : [],
+            ..keys.Answer3 is string a3 ? new ReadOnlySpan<string>(ref a3) : []
+            ]);
     }
 
     private static string DecryptStringFromBytes_Aes(Input input, Key key, int part)
