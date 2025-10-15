@@ -36,6 +36,13 @@ sealed record Me(string Name, int Seed, ImmutableDictionary<int, object?> Badges
             ]);
     }
 
+    public static async Task<Part> GetTestInputAsync(int year, int day, int part, string file)
+    {
+        var input = JsonSerializer.Deserialize<Input>(File.ReadAllText(file))!;
+
+        return new(null!, year, day, part, Encoding.UTF8.GetString(input[part]), []);
+    }
+
     public async Task<Input> GetInputAsync(int year, int day)
     {
         return JsonSerializer.Deserialize<Input>(await GetJson(this, year, day))!;
@@ -123,7 +130,17 @@ public sealed class Solution : ISolution
         sealed class HexStringConverter : JsonConverter<byte[]>
         {
             public override byte[]? Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
-            => Convert.FromHexString(reader.GetString()!);
+            {
+                var r = reader;
+                try
+                {
+                    return Convert.FromHexString(reader.GetString()!);
+                }
+                catch (FormatException)
+                {
+                    return Encoding.UTF8.GetBytes(r.GetString()!);
+                }
+            }
 
             public override void Write(Utf8JsonWriter writer, byte[] value, JsonSerializerOptions options)
             => writer.WriteStringValue(Convert.ToHexString(value));

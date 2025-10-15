@@ -28,4 +28,13 @@ app.AddCommand("get", async ([Argument] int year, [Argument] int day, [Option('s
     var input = await me.GetInputAsync(year, day);
 });
 
+app.AddCommand("test", async ([Argument] int year, [Argument] int day, [Argument] int part, [Argument]string file) =>
+{
+    var input = await Me.GetTestInputAsync(year, day, part, file);
+    var type = Assembly.GetEntryAssembly()!.GetType($"Y{year}.D{day:00}.Solution");
+    var solution = (ISolution)Activator.CreateInstance(type!)!;
+    var output = solution.Solve(part, input.Input);
+    Console.WriteLine(output);
+});
+
 app.Run();
