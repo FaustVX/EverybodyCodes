@@ -42,7 +42,7 @@ sealed record Me(string Name, int Seed, ImmutableDictionary<int, object?> Badges
 
         static async Task<string> GetJson(Me me, int year, int day)
         {
-            var path = Path.Combine("EverybodyCodes.Core", $"Y{year}", $"D{day:00}", "input.json");
+            var path = Path.Combine("Solutions", $"Y{year}", $"D{day:00}", "input.json");
             if (File.Exists(path))
                 return File.ReadAllText(path);
 
@@ -51,6 +51,7 @@ sealed record Me(string Name, int Seed, ImmutableDictionary<int, object?> Badges
 
             var json = (await clientCdn.GetStringAsync($"/assets/{year}/{day}/input/{me.Seed}.json"))!;
             CreateParentDir(Path.GetDirectoryName(path)!);
+            CreateSolutionFile(year, day);
             File.WriteAllText(path, json);
             return json;
 
@@ -61,6 +62,36 @@ sealed record Me(string Name, int Seed, ImmutableDictionary<int, object?> Badges
                 CreateParentDir(Path.GetDirectoryName(dir)!);
                 Directory.CreateDirectory(dir);
             }
+        }
+
+        static void CreateSolutionFile(int year, int day)
+        {
+            var path = Path.Combine("Solutions", $"Y{year}", $"D{day:00}", "Solution.cs");
+            if (File.Exists(path))
+                return;
+            File.WriteAllText(path, $$"""
+using ZLinq;
+
+namespace Y{{year}}.D{{day:00}};
+
+public sealed class Solution : ISolution
+{
+    public string Solve1(ReadOnlySpan<char> input)
+    {
+        throw new NotImplementedException();
+    }
+
+    public string Solve2(ReadOnlySpan<char> input)
+    {
+        throw new NotImplementedException();
+    }
+
+    public string Solve3(ReadOnlySpan<char> input)
+    {
+        throw new NotImplementedException();
+    }
+}
+""");
         }
     }
 
