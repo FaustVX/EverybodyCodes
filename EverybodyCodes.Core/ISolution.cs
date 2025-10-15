@@ -6,6 +6,7 @@ public interface ISolution
         1 => Solve1(input),
         2 => Solve2(input),
         3 => Solve3(input),
+        _ => throw new IndexOutOfRangeException(),
     };
 
     public abstract string Solve1(ReadOnlySpan<char> input);

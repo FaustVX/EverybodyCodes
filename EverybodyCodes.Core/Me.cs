@@ -36,7 +36,7 @@ sealed record Me(string Name, int Seed, ImmutableDictionary<int, object?> Badges
             ]);
     }
 
-    public static async Task<Part> GetTestInputAsync(int year, int day, int part, string file)
+    public static Part GetTestInputAsync(int year, int day, int part, string file)
     {
         var input = JsonSerializer.Deserialize<Input>(File.ReadAllText(file))!;
 
@@ -125,6 +125,7 @@ public sealed class Solution : ISolution
             1 => A,
             2 => B,
             3 => C,
+            _ => throw new IndexOutOfRangeException(),
         };
 
         sealed class HexStringConverter : JsonConverter<byte[]>
@@ -154,6 +155,7 @@ public sealed class Solution : ISolution
             1 => GetBytes(Key1 ?? "", iv),
             2 => GetBytes(Key2 ?? "", iv),
             3 => GetBytes(Key3 ?? "", iv),
+            _ => throw new IndexOutOfRangeException(),
         };
 
         private static byte[] GetBytes(string key, bool isIv)
