@@ -10,6 +10,7 @@ app.AddCommand("run", async ([Argument] int year, [Argument] int day, [Argument]
     var type = Assembly.GetEntryAssembly()!.GetType($"Y{year}.D{day:00}.Solution");
     var solution = (ISolution)Activator.CreateInstance(type!)!;
     var output = solution.Solve(part, input.Input);
+    Console.WriteLine(output);
     var response = await input.AnswerAsync(output);
     Console.WriteLine(response);
     return response switch
