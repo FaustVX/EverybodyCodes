@@ -5,22 +5,22 @@ using System.Text.Json.Serialization;
 
 sealed record Part(Me Me, int Year, int Day, int PartNo, string Input, ImmutableArray<string> Answers)
 {
-    public async Task<PartResponse> AnswerAsync(string answer)
+    public async Task<PartResponse> AnswerAsync(string response)
     {
         if (Answers.Length >= PartNo)
-            return new(Answers[PartNo - 1] == answer, Answers[PartNo - 1].Length == answer.Length, Answers[PartNo - 1][0] == answer[0], default, default, default, 0, 0);
+            return PartResponse.CreateFromAnswer(Answers[PartNo - 1], response);
 
         using var handler = new HttpClientHandler() { CookieContainer = Me.Cookies };
         using var client = new HttpClient(handler) { BaseAddress = Me.BaseAddress };
 
-        var content = JsonContent.Create(new { answer });
-        using var response = (await client.PostAsync($"/api/event/{Year}/quest/{Day}/part/{PartNo}/answer", content))!;
-        if (!response.IsSuccessStatusCode)
+        var content = JsonContent.Create(new { response });
+        using var output = (await client.PostAsync($"/api/event/{Year}/quest/{Day}/part/{PartNo}/answer", content))!;
+        if (!output.IsSuccessStatusCode)
         {
-            Console.WriteLine(await response.Content.ReadAsStringAsync());
-            response.EnsureSuccessStatusCode();
+            Console.WriteLine(await output.Content.ReadAsStringAsync());
+            output.EnsureSuccessStatusCode();
         }
-        return (await response.Content.ReadFromJsonAsync<PartResponse>())!;
+        return (await output.Content.ReadFromJsonAsync<PartResponse>())!;
     }
 }
 
@@ -34,4 +34,7 @@ sealed record PartResponse([property: JsonPropertyName("correct")] bool IsCorrec
         public override void Write(Utf8JsonWriter writer, TimeSpan value, JsonSerializerOptions options)
         => writer.WriteNumberValue((long)value.TotalMilliseconds);
     }
+
+    public static PartResponse CreateFromAnswer(string response, string answer)
+    => new(response == answer, response.Length == answer.Length, response[0] == answer[0], default, default, default, 0, 0);
 }
