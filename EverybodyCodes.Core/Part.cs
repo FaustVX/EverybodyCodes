@@ -3,7 +3,9 @@ using System.Net.Http.Json;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 
-sealed record Part(Me Me, int Year, int Day, int PartNo, string Input, ImmutableArray<string> Answers)
+namespace EverybodyCodes.Core;
+
+public sealed record Part(Me Me, int Year, int Day, int PartNo, string Input, ImmutableArray<string> Answers)
 {
     public async Task<PartResponse> AnswerAsync(string response)
     {
@@ -24,7 +26,7 @@ sealed record Part(Me Me, int Year, int Day, int PartNo, string Input, Immutable
     }
 }
 
-sealed record PartResponse([property: JsonPropertyName("correct")] bool IsCorrect, [property: JsonPropertyName("lengthCorrect")] bool IsLengthCorrect, [property: JsonPropertyName("firstCorrect")] bool IsFirstCorrect, [property: JsonConverter(typeof(PartResponse.TimeSpanMSConverter))] TimeSpan Time, [property: JsonConverter(typeof(PartResponse.TimeSpanMSConverter))] TimeSpan LocalTime, [property: JsonConverter(typeof(PartResponse.TimeSpanMSConverter))] TimeSpan GlobalTime, int GlobalPlace, int GlobalScore)
+public sealed record PartResponse([property: JsonPropertyName("correct")] bool IsCorrect, [property: JsonPropertyName("lengthCorrect")] bool IsLengthCorrect, [property: JsonPropertyName("firstCorrect")] bool IsFirstCorrect, [property: JsonConverter(typeof(PartResponse.TimeSpanMSConverter))] TimeSpan Time, [property: JsonConverter(typeof(PartResponse.TimeSpanMSConverter))] TimeSpan LocalTime, [property: JsonConverter(typeof(PartResponse.TimeSpanMSConverter))] TimeSpan GlobalTime, int GlobalPlace, int GlobalScore)
 {
     sealed class TimeSpanMSConverter : JsonConverter<TimeSpan>
     {

@@ -6,7 +6,9 @@ using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 
-sealed record Me(string Name, int Seed, ImmutableDictionary<int, object?> Badges, int Level)
+namespace EverybodyCodes.Core;
+
+public sealed record Me(string Name, int Seed, ImmutableDictionary<int, object?> Badges, int Level)
 {
     [JsonIgnore]
     public static Uri BaseAddress { get; } = new("https://everybody.codes");

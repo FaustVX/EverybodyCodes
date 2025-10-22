@@ -1,3 +1,5 @@
+namespace EverybodyCodes.Core;
+
 public interface ISolution
 {
     public string Solve(int part, ReadOnlySpan<char> input)

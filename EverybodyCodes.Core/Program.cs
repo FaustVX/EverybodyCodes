@@ -1,5 +1,6 @@
 ﻿using System.Reflection;
 using Cocona;
+using EverybodyCodes.Core;
 
 var app = CoconaLiteApp.Create(args);
 
