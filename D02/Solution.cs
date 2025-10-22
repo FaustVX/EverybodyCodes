@@ -7,12 +7,11 @@ public sealed class Solution : ISolution
 {
     public string Solve1(ReadOnlySpan<char> input)
     {
+        input = input[6..];
         var ranges = (stackalloc Range[2]);
         input.Split(ranges, "\n\n");
         var words = input[ranges[0]];
         var text = input[ranges[1]];
-        words.Split(ranges, ':');
-        words = words[ranges[1]];
         ranges = (stackalloc Range[words.Count(',') + 1]);
         words.Split(ranges, ',');
         var count = 0;
@@ -32,12 +31,11 @@ public sealed class Solution : ISolution
 
     public string Solve2(ReadOnlySpan<char> input)
     {
+        input = input[6..];
         var ranges = (stackalloc Range[2]);
-        input.Split(ranges, '\n', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+        input.Split(ranges, "\n\n");
         var words = input[ranges[0]];
         var text = input[ranges[1]];
-        words.Split(ranges, ':');
-        words = words[ranges[1]];
         ranges = (stackalloc Range[words.Count(',') + 1]);
         words.Split(ranges, ',');
         var count = 0;
