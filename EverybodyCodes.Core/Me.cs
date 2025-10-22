@@ -51,7 +51,7 @@ public sealed record Me(string Name, int Seed, ImmutableDictionary<int, object?>
 
         static async Task<string> GetJson(Me me, int year, int day)
         {
-            var path = Path.Combine("Solutions", $"Y{year}", $"D{day:00}", "input.json");
+            var path = Path.Combine($"D{day:00}", "input.json");
             if (File.Exists(path))
                 return File.ReadAllText(path);
 
@@ -75,7 +75,7 @@ public sealed record Me(string Name, int Seed, ImmutableDictionary<int, object?>
 
         static void CreateSolutionFile(int year, int day)
         {
-            var path = Path.Combine("Solutions", $"Y{year}", $"D{day:00}", "Solution.cs");
+            var path = Path.Combine($"D{day:00}", "Solution.cs");
             if (File.Exists(path))
                 return;
             File.WriteAllText(path, $$"""
