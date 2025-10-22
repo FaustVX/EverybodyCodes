@@ -40,7 +40,7 @@ public sealed record Me(string Name, int Seed, ImmutableDictionary<int, object?>
 
     public static Part GetTestInputAsync(int year, int day, int part, string file)
     {
-        var input = JsonSerializer.Deserialize<Input>(File.ReadAllText(file))!;
+        var input = JsonSerializer.Deserialize<Input>(File.ReadAllText(Path.Combine($"D{day:00}", file)))!;
 
         return new(null!, year, day, part, Encoding.UTF8.GetString(input[part]), []);
     }
