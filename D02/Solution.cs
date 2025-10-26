@@ -38,6 +38,7 @@ public sealed class Solution : ISolution
         var text = input[ranges[1]];
         ranges = (stackalloc Range[words.Count(',') + 1]);
         words.Split(ranges, ',');
+        ranges.AsValueEnumerable().OrderByDescending(r => r.Length).CopyTo(ranges);
         var count = 0;
         Range last = default;
         for (int i = 0; i < text.Length; i++)
