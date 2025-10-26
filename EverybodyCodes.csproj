@@ -26,4 +26,8 @@
     <None Remove="lib/**" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Compile Include="lib/EverybodyCodes.Core/Program.cs" />
+  </ItemGroup>
+
 </Project>
