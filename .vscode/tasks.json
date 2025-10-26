@@ -16,7 +16,8 @@
 				"isDefault": true
 			},
 			"presentation": {
-				"reveal": "silent"
+				"reveal": "silent",
+				"close": true,
 			},
 			"problemMatcher": "$msCompile"
 		},
