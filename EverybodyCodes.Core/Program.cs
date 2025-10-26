@@ -1,6 +1,7 @@
 ﻿using System.Reflection;
 using Cocona;
 using EverybodyCodes.Core;
+using EverybodyCodes.Core.Attributes;
 
 var app = CoconaLiteApp.Create(args);
 
@@ -10,7 +11,8 @@ app.AddCommand("run", async ([Argument] int year, [Argument] int day, [Argument]
     var input = await me.GetInputAsync(year, day, part);
     var type = Assembly.GetEntryAssembly()!.GetType($"Y{year}.D{day:00}.Solution");
     var solution = (ISolution)Activator.CreateInstance(type!)!;
-    var output = solution.Solve(part, input.Input);
+    var addFinalLF = type!.GetMethod($"Solve{part}")!.CustomAttributes.Any(a => a.AttributeType == typeof(AddFinalLineFeedAttribute));
+    var output = solution.Solve(part, addFinalLF ? input.Input + "\n" : input.Input);
     Console.WriteLine(output);
     var response = await input.AnswerAsync(output);
     Console.WriteLine(response);
@@ -35,7 +37,8 @@ app.AddCommand("test", ([Argument] int year, [Argument] int day, [Argument] int 
     var input = Me.GetTestInputAsync(year, day, part, file);
     var type = Assembly.GetEntryAssembly()!.GetType($"Y{year}.D{day:00}.Solution");
     var solution = (ISolution)Activator.CreateInstance(type!)!;
-    var output = solution.Solve(part, input.Input);
+    var addFinalLF = type!.GetMethod($"Solve{part}")!.CustomAttributes.Any(a => a.AttributeType == typeof(AddFinalLineFeedAttribute));
+    var output = solution.Solve(part, addFinalLF ? input.Input + "\n" : input.Input);
     Console.WriteLine(output);
 });
 
