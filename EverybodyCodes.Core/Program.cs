@@ -12,7 +12,10 @@ app.AddCommand("run", async ([Argument] int year, [Argument] int day, [Argument]
     var type = Assembly.GetEntryAssembly()!.GetType($"Y{year}.D{day:00}.Solution");
     var solution = (ISolution)Activator.CreateInstance(type!)!;
     var addFinalLF = type!.GetMethod($"Solve{part}")!.CustomAttributes.Any(a => a.AttributeType == typeof(AddFinalLineFeedAttribute));
-    var output = solution.Solve(part, addFinalLF ? input.Input + "\n" : input.Input);
+    var input1 = addFinalLF ? input.Input + "\n" : input.Input;
+    var startTime = TimeProvider.System.GetTimestamp();
+    var output = solution.Solve(part, input1);
+    Console.WriteLine(TimeProvider.System.GetElapsedTime(startTime));
     Console.WriteLine(output);
     var response = await input.AnswerAsync(output);
     Console.WriteLine(response);
@@ -38,7 +41,10 @@ app.AddCommand("test", ([Argument] int year, [Argument] int day, [Argument] int 
     var type = Assembly.GetEntryAssembly()!.GetType($"Y{year}.D{day:00}.Solution");
     var solution = (ISolution)Activator.CreateInstance(type!)!;
     var addFinalLF = type!.GetMethod($"Solve{part}")!.CustomAttributes.Any(a => a.AttributeType == typeof(AddFinalLineFeedAttribute));
-    var output = solution.Solve(part, addFinalLF ? input.Input + "\n" : input.Input);
+    var input1 = addFinalLF ? input.Input + "\n" : input.Input;
+    var startTime = TimeProvider.System.GetTimestamp();
+    var output = solution.Solve(part, input1);
+    Console.WriteLine(TimeProvider.System.GetElapsedTime(startTime));
     Console.WriteLine(output);
 });
 
