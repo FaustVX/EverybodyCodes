@@ -1,7 +1,14 @@
 using ZLinq;
 using EverybodyCodes.Core;
+using CommunityToolkit.HighPerformance;
+using EverybodyCodes.Core.Attributes;
+using CommunityToolkit.HighPerformance.Enumerables;
+using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 
 namespace Y2024.D02;
+
+using System;
 
 public sealed class Solution : ISolution
 {
@@ -56,25 +63,86 @@ public sealed class Solution : ISolution
         static int StartWith(ReadOnlySpan<char> text, ReadOnlySpan<char> words, ReadOnlySpan<Range> ranges)
         {
             foreach (var range in ranges)
-                if (text.StartsWith(words[range]) || text.StartWithReversed(words[range]))
+                if (text.StartsWith(words[range]) || text.StartsWithReversed(words[range]))
                     return words[range].Length;
             return default;
         }
     }
 
+    [AddFinalLineFeed]
     public string Solve3(ReadOnlySpan<char> input)
     {
-        throw new NotImplementedException();
+        input = input[6..];
+        var ranges = (stackalloc Range[2]);
+        input.Split(ranges, "\n\n");
+        var words = input[ranges[0]];
+        var text = input[ranges[1]];
+        ranges = (stackalloc Range[words.Count(',') + 1]);
+        words.Split(ranges, ',');
+        ranges.AsValueEnumerable().OrderByDescending(r => r.Length).CopyTo(ranges);
+        var span2D = text.AsSpan2D('\n');
+        var set = new HashSet<(int x, int y)>();
+
+        for (var y = 0; y < span2D.Height; y++)
+            for (var x = 0; x < span2D.Width; x++)
+                foreach (var range in ranges)
+                {
+                    var row = span2D.GetRow(y);
+                    if (row.StartsWithWraped(x, words[range])
+                    || row.StartsWithWraped(x, words[range].Reversed()))
+                        for (var i = 0; i < range.Length; i++)
+                            set.Add(((x + i) % row.Length, y));
+                    var column = span2D[y.., ..].GetColumn(x);
+                    if (column.StartsWith(words[range])
+                    || column.StartsWith(words[range].Reversed()))
+                        for (var i = 0; i < range.Length; i++)
+                            set.Add((x, y + i));
+                }
+        return set.Count.ToString();
     }
 }
 
+[System.Diagnostics.DebuggerStepThrough]
 file static class Ext
 {
-    extension<T>(ReadOnlySpan<T> span)
+    extension<T>(ReadOnlyRefEnumerable<T> span)
     where T : unmanaged, IEquatable<T>
     {
         /// <inheritdoc cref="MemoryExtensions.StartsWith{T}(ReadOnlySpan{T}, ReadOnlySpan{T})"/>
-        public bool StartWithReversed(ReadOnlySpan<T> value)
+        public bool StartsWith(ReadOnlySpan<T> value)
+        {
+            if (span.Length < value.Length)
+                return false;
+            for (var i = 0; i < value.Length; i++)
+                if (!span[i].Equals(value[i]))
+                    return false;
+            return true;
+        }
+
+        public bool StartsWithWraped(int startIndex, ReadOnlySpan<T> value)
+        {
+            for (var i = 0; i < value.Length; i++)
+                if (!span[(i + startIndex) % span.Length].Equals(value[i]))
+                    return false;
+            return true;
+        }
+
+        public ReadOnlyRefEnumerable<T> GetRange(Range range)
+        => ReadOnlyRefEnumerable<T>.DangerousCreate(in span[range.Start], range.GetOffsetAndLength(span.Length).Length * span.GetStep(), span.GetStep());
+    }
+
+    extension<T>(ref readonly ReadOnlyRefEnumerable<T> span)
+    where T : unmanaged, IEquatable<T>
+    {
+        [UnsafeAccessor(UnsafeAccessorKind.Field, Name = "step")]
+        public extern ref int GetStep();
+    }
+
+    extension<T>(ReadOnlySpan<T> span)
+    where T : unmanaged
+    {
+        /// <inheritdoc cref="MemoryExtensions.StartsWith{T}(ReadOnlySpan{T}, ReadOnlySpan{T})"/>
+        public bool StartsWithReversed(ReadOnlySpan<T> value)
         {
             var reversed = (stackalloc T[value.Length]);
             value.Reverse(reversed);
@@ -86,6 +154,24 @@ file static class Ext
             span.CopyTo(destination);
             destination.Reverse();
         }
+
+        public ReadOnlySpan<T> Reversed()
+        {
+            Unsafe.AsSpan(span).Reverse();
+            return span;
+        }
+
+        public ReadOnlySpan2D<T> AsSpan2D(T delimitor)
+        => span.AsSpan2D(span.Count(delimitor), span.IndexOf(delimitor) + 1)[.., ..^1];
+
+        public ReadOnlyRefEnumerable<T> AsReadOnlyRefEnumerable()
+        => ReadOnlyRefEnumerable<T>.DangerousCreate(in span[0], span.Length, 1);
+    }
+
+    extension(Unsafe)
+    {
+        public static Span<T> AsSpan<T>(ReadOnlySpan<T> span)
+        => MemoryMarshal.CreateSpan(ref Unsafe.AsRef(in span[0]), span.Length);
     }
 
     extension(Range range)

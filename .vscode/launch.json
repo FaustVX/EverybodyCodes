@@ -22,7 +22,7 @@
             "preLaunchTask": "build",
             // If you have changed target frameworks, make sure to update the program path.
             "program": "${workspaceFolder}/bin/Debug/net10.0/EverybodyCodes.dll",
-            "args": ["run", "${input:year}", "${input:day}", "${input:part}", "--session", "${input:session}"],
+            "args": ["run", "2024", "${input:day}", "${input:part}", "--session", "${input:session}"],
             "cwd": "${workspaceFolder}",
             // For more information about the 'console' field, see https://github.com/OmniSharp/omnisharp-vscode/blob/master/debugger-launchjson.md#console-terminal-window
             "console": "integratedTerminal",
@@ -37,7 +37,7 @@
             "preLaunchTask": "build",
             // If you have changed target frameworks, make sure to update the program path.
             "program": "${workspaceFolder}/bin/Debug/net10.0/EverybodyCodes.dll",
-            "args": ["test", "${input:year}", "${input:day}", "${input:part}", "${input:file}"],
+            "args": ["test", "2024", "${input:day}", "${input:part}", "${input:file}"],
             "cwd": "${workspaceFolder}",
             // For more information about the 'console' field, see https://github.com/OmniSharp/omnisharp-vscode/blob/master/debugger-launchjson.md#console-terminal-window
             "console": "integratedTerminal",
@@ -47,15 +47,6 @@
         },
     ],
     "inputs": [
-        {
-            "id": "year",
-            "type": "command",
-            "command": "memento.promptString",
-            "args": {
-                "id": "year",
-                "description": "Current year (YYYY)"
-            }
-        },
         {
             "id": "day",
             "type": "command",

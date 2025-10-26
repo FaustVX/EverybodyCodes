@@ -16,9 +16,17 @@
 				"isDefault": true
 			},
 			"presentation": {
-				"reveal": "silent"
+				"reveal": "silent",
+				"close": true,
 			},
-			"problemMatcher": "$msCompile"
+			"problemMatcher": "$msCompile",
+			"options": {
+				"statusbar": {
+					"running": {
+						"label": "building"
+					}
+				}
+			}
 		},
 		{
 			"label": "get",
@@ -30,27 +38,51 @@
 				"${workspaceFolder}/EverybodyCodes.csproj",
 				"--",
 				"get",
-				"${input:year}",
+				"2024",
 				"${input:day}",
 				"--session",
 				"${input:session}"
 			],
 			"dependsOn": "build",
 			"options": {
-				"cwd": "${workspaceFolder}"
+				"cwd": "${workspaceFolder}",
+				"statusbar": {
+					"running": {
+						"label": "getting"
+					}
+				}
 			}
-		}
+		},
+		{
+			"label": "run",
+			"type": "process",
+			"command": "dotnet",
+			"args": [
+				"run",
+				"--project",
+				"${workspaceFolder}/EverybodyCodes.csproj",
+				"--configuration",
+				"Release",
+				"--",
+				"run",
+				"2024",
+				"${input:day}",
+				"${input:part}",
+				"--session",
+				"${input:session}"
+			],
+			"dependsOn": "build",
+			"options": {
+				"cwd": "${workspaceFolder}",
+				"statusbar": {
+					"running": {
+						"label": "running"
+					}
+				}
+			}
+		},
 	],
     "inputs": [
-        {
-            "id": "year",
-            "type": "command",
-            "command": "memento.promptString",
-            "args": {
-                "id": "year",
-                "description": "Current year (YYYY)"
-            }
-        },
         {
             "id": "day",
             "type": "command",
@@ -59,6 +91,16 @@
                 "id": "day",
                 "options": ["01", "02", "03", "04", "05", "06", "07", "08", "09", "10", "11", "12", "13", "14", "15", "16", "17", "18", "19", "20", "21", "22", "23", "24", "25"],
                 "description": "Current day"
+            }
+        },
+        {
+            "id": "part",
+            "type": "command",
+            "command": "memento.pickString",
+            "args": {
+                "id": "part",
+                "options": ["1", "2", "3"],
+                "description": "Current part"
             }
         },
         {
