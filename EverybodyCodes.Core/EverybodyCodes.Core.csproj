@@ -9,6 +9,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="BenchmarkDotNet" Version="0.15.4" />
     <PackageReference Include="ZLinq" Version="1.4.8" />
     <PackageReference Include="Cocona.Lite" Version="2.2.0" />
   </ItemGroup>

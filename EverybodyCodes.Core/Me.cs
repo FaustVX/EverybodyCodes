@@ -31,7 +31,7 @@ public sealed record Me(string Name, int Seed, ImmutableDictionary<int, object?>
         using var client = new HttpClient(handler) { BaseAddress = BaseAddress };
         var keys = (await client.GetFromJsonAsync<Key>($"/api/event/{year}/quest/{day}"))!;
 
-        return new(this, year, day, part, DecryptStringFromBytes_Aes(input, keys, part), [
+        return new(this, year, day, part, DecryptStringFromBytes_Aes(input, keys, part) + (Globals.AddFinalLineFeed[part] ? "\n" : ""), [
             ..keys.Answer1 is string a1 ? new ReadOnlySpan<string>(ref a1) : [],
             ..keys.Answer2 is string a2 ? new ReadOnlySpan<string>(ref a2) : [],
             ..keys.Answer3 is string a3 ? new ReadOnlySpan<string>(ref a3) : []

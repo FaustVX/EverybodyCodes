@@ -81,6 +81,33 @@
 				}
 			}
 		},
+		{
+			"label": "bench",
+			"type": "process",
+			"command": "dotnet",
+			"args": [
+				"run",
+				"--project",
+				"${workspaceFolder}/EverybodyCodes.csproj",
+				"--configuration",
+				"Release",
+				"--",
+				"bench",
+				"${input:year}",
+				"${input:day}",
+				"--session",
+				"${input:session}"
+			],
+			"dependsOn": "build",
+			"options": {
+				"cwd": "${workspaceFolder}",
+				"statusbar": {
+					"running": {
+						"label": "benchmarking"
+					}
+				}
+			}
+		},
 	],
     "inputs": [
         {
