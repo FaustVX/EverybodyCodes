@@ -80,6 +80,7 @@ public sealed record Me(string Name, int Seed, ImmutableDictionary<int, object?>
                 return;
             File.WriteAllText(path, $$"""
 using ZLinq;
+using EverybodyCodes.Core;
 
 namespace Y{{year}}.D{{day:00}};
 
