@@ -20,7 +20,7 @@ public sealed class Solution : ISolution
             '#' => 1,
             _ => throw new UnreachableException(),
         }));
-        var ground = span.AsSpan2D('\n');
+        var ground = span.AsSpan2D('\n').Minimize((ushort)0);
         span.Replace('\n', (ushort)0);
         for (var isModified = true; isModified;)
         {
@@ -43,9 +43,7 @@ public sealed class Solution : ISolution
     }
 
     public string Solve2(ReadOnlySpan<char> input)
-    {
-        throw new NotImplementedException();
-    }
+    => Solve1(input);
 
     public string Solve3(ReadOnlySpan<char> input)
     {
@@ -80,5 +78,56 @@ file static class Ext
     {
         public Span2D<T> AsSpan2D(T delimitor)
         => span.AsSpan2D(span.Count(delimitor), span.IndexOf(delimitor) + 1)[.., ..^1];
+    }
+
+    extension<T>(Span2D<T> span)
+    where T : unmanaged
+    {
+        public Span2D<T> Minimize(T border)
+        {
+            var temp = (stackalloc T[span.Width]);
+            var prev = span;
+
+            while (true)
+            {
+                span.GetRow(0).CopyTo(temp);
+                if (!temp.ContainsAnyExcept(border))
+                    break;
+                prev = span;
+                span = span[1.., ..];
+            }
+            span = prev;
+            while (true)
+            {
+                span.GetRow((^1).GetOffset(span.Height)).CopyTo(temp);
+                if (!temp.ContainsAnyExcept(border))
+                    break;
+                prev = span;
+                span = span[..^1, ..];
+            }
+            span = prev;
+
+            temp = temp[..span.Height];
+            while (true)
+            {
+                span.GetColumn(0).CopyTo(temp);
+                if (!temp.ContainsAnyExcept(border))
+                    break;
+                prev = span;
+                span = span[.., 1..];
+            }
+            span = prev;
+            while (true)
+            {
+                span.GetColumn((^1).GetOffset(span.Width)).CopyTo(temp);
+                if (!temp.ContainsAnyExcept(border))
+                    break;
+                prev = span;
+                span = span[.., ..^1];
+            }
+            span = prev;
+
+            return span;
+        }
     }
 }
