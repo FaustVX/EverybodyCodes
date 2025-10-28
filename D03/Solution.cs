@@ -4,6 +4,7 @@ using EverybodyCodes.Core;
 using CommunityToolkit.HighPerformance;
 using System.Diagnostics;
 using ZLinq;
+using EverybodyCodes.Core.Attributes;
 
 namespace Y2024.D03;
 
@@ -31,7 +32,10 @@ public sealed class Solution : ISolution
                     ref var c = ref ground[y, x];
                     if (c == 0)
                         continue;
-                    if (ground[y - 1, x] >= c && ground[y + 1, x] == c && ground[y, x - 1] >= c && ground[y, x + 1] == c)
+                    if (ground.TryGetAt(y - 1, x) >= c
+                    && ground.TryGetAt(y + 1, x) >= c
+                    && ground.TryGetAt(y, x - 1) >= c
+                    && ground.TryGetAt(y, x + 1) >= c)
                     {
                         isModified = true;
                         c++;
@@ -45,9 +49,43 @@ public sealed class Solution : ISolution
     public string Solve2(ReadOnlySpan<char> input)
     => Solve1(input);
 
+    [AddFinalLineFeed]
     public string Solve3(ReadOnlySpan<char> input)
     {
-        throw new NotImplementedException();
+        var span = MemoryMarshal.Cast(Unsafe.AsSpan(input), static c => (ushort)(c switch
+        {
+            '.' => 0,
+            '\n' => '\n',
+            '#' => 1,
+            _ => throw new UnreachableException(),
+        }));
+        var ground = span.AsSpan2D('\n');
+        span.Replace('\n', (ushort)0);
+        for (var isModified = true; isModified;)
+        {
+            isModified = false;
+            for (var y = 0; y < ground.Height; y++)
+                for (var x = 0; x < ground.Width; x++)
+                {
+                    ref var c = ref ground[y, x];
+                    if (c == 0)
+                        continue;
+                    if (ground.TryGetAt(y - 1, x) >= c
+                    && ground.TryGetAt(y + 1, x) >= c
+                    && ground.TryGetAt(y, x - 1) >= c
+                    && ground.TryGetAt(y, x + 1) >= c
+                    && ground.TryGetAt(y - 1, x - 1) >= c
+                    && ground.TryGetAt(y - 1, x + 1) >= c
+                    && ground.TryGetAt(y + 1, x - 1) >= c
+                    && ground.TryGetAt(y + 1, x + 1) >= c)
+                    {
+                        isModified = true;
+                        c++;
+                    }
+                }
+        }
+
+        return span.AsValueEnumerable().Sum().ToString();
     }
 }
 
@@ -83,6 +121,15 @@ file static class Ext
     extension<T>(Span2D<T> span)
     where T : unmanaged
     {
+        public T TryGetAt(int y, int x, T defaultValue = default)
+        {
+            if (y < 0 || x < 0)
+                return defaultValue;
+            if (y >= span.Height || x >= span.Width)
+                return defaultValue;
+            return span[y, x];
+        }
+
         public Span2D<T> Minimize(T border)
         {
             var temp = (stackalloc T[span.Width]);
