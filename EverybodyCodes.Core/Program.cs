@@ -18,7 +18,7 @@ app.AddCommand("run", async ([Argument] int year, [Argument] int day, [Argument]
     Console.WriteLine(TimeProvider.System.GetElapsedTime(startTime));
     Console.WriteLine(output);
     var response = await input.AnswerAsync(output);
-    if (response.IsCorrect)
+    if (response.IsCorrect && response.Time != default)
     {
         await Shell.Git.Add($"D{day:00}/");
         await Shell.Git.Commit($"D{day:00}/{part}");
