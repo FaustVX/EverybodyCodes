@@ -18,6 +18,11 @@ app.AddCommand("run", async ([Argument] int year, [Argument] int day, [Argument]
     Console.WriteLine(TimeProvider.System.GetElapsedTime(startTime));
     Console.WriteLine(output);
     var response = await input.AnswerAsync(output);
+    if (response.IsCorrect)
+    {
+        await Shell.Git.Add($"D{day:00}/");
+        await Shell.Git.Commit($"D{day:00}/{part}");
+    }
     Console.WriteLine(response);
     return response switch
     {
@@ -33,6 +38,9 @@ app.AddCommand("get", async ([Argument] int year, [Argument] int day, [Option('s
 {
     var me = await Me.CreateAsync(session);
     var input = await me.GetInputAsync(year, day);
+    await Shell.Git.Add($"D{day:00}/");
+    await Shell.Git.Commit($"D{day:00}");
+    await Shell.OpenVsCode($"D{day:00}/Solution.cs", $"D{day:00}/input.json");
 });
 
 app.AddCommand("test", ([Argument] int year, [Argument] int day, [Argument] int part, [Argument]string file) =>
