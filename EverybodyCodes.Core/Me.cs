@@ -84,6 +84,7 @@ using EverybodyCodes.Core;
 
 namespace Y{{year}}.D{{day:00}};
 
+// https://everybody.codes/{{(year < 2000 ? "story" : "event")}}/{{year}}/quests/{{day}}
 public sealed class Solution : ISolution
 {
     public string Solve1(ReadOnlySpan<char> input)
