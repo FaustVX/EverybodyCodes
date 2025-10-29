@@ -6,6 +6,7 @@ namespace Y2024.D04;
 // https://everybody.codes/event/2024/quests/4
 public sealed class Solution : ISolution
 {
+    // https://everybody.codes/event/2024/quests/4#:~:text=Part%20I
     public string Solve1(ReadOnlySpan<char> input)
     {
         var ranges = (stackalloc Range[input.Count('\n') + 1]);
@@ -19,9 +20,11 @@ public sealed class Solution : ISolution
         return nails.AsValueEnumerable().Sum().ToString();
     }
 
+    // https://everybody.codes/event/2024/quests/4#:~:text=Part%20II
     public string Solve2(ReadOnlySpan<char> input)
     => Solve1(input);
 
+    // https://everybody.codes/event/2024/quests/4#:~:text=Part%20III
     public string Solve3(ReadOnlySpan<char> input)
     {
         var ranges = (stackalloc Range[input.Count('\n') + 1]);

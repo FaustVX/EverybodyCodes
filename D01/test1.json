@@ -1,5 +1,14 @@
 {
-    "1": "ABBAC",
-    "2": "AxBCDDCAxD",
-    "3": "xBxAAABCDxCC"
+    "1": {
+        "input": "ABBAC",
+        "answer": "5"
+    },
+    "2": {
+        "input": "AxBCDDCAxD",
+        "answer": "28"
+    },
+    "3": {
+        "input": "xBxAAABCDxCC",
+        "answer": "30"
+    }
 }

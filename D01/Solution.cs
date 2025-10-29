@@ -6,9 +6,11 @@ namespace Y2024.D01;
 
 public sealed class Solution : ISolution
 {
+    // https://everybody.codes/event/2024/quests/1#:~:text=Part%20I
     public string Solve1(ReadOnlySpan<char> input)
     => input.AsValueEnumerable().Sum(Potions).ToString();
 
+    // https://everybody.codes/event/2024/quests/1#:~:text=Part%20II
     public string Solve2(ReadOnlySpan<char> input)
     => input.AsValueEnumerable().Chunk(2).Sum(static p => p switch
     {
@@ -18,7 +20,7 @@ public sealed class Solution : ISolution
         [var a, var b] => Potions(a) + Potions(b) + 2,
         _ => throw new UnreachableException(),
     }).ToString();
-
+    // https://everybody.codes/event/2024/quests/1#:~:text=Part%20III
     public string Solve3(ReadOnlySpan<char> input)
     => input.AsValueEnumerable().Chunk(3).Sum(static p => p switch
     {

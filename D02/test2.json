@@ -1,5 +1,14 @@
 {
-    "1": "WORDS:THE,OWE,MES,ROD,HER\n\nAWAKEN THE POWER ADORNED WITH THE FLAMES BRIGHT IRE",
-    "2": "WORDS:G,GT\n\nGT",
-    "3": "WORDS:THE,OWE,MES,ROD,RODEO\n\nHEEDORLT\nENWGWDXL\nTRODEOAL"
+    "1": {
+        "input": "WORDS:THE,OWE,MES,ROD,HER\n\nAWAKEN THE POWER ADORNED WITH THE FLAMES BRIGHT IRE",
+        "answer": "4"
+    },
+    "2": {
+        "input": "WORDS:G,GT\n\nGT",
+        "answer": "2"
+    },
+    "3": {
+        "input": "WORDS:THE,OWE,MES,ROD,RODEO\n\nHEEDORLT\nENWGWDXL\nTRODEOAL",
+        "answer": "14"
+    }
 }

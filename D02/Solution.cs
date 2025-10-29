@@ -12,6 +12,7 @@ using System;
 
 public sealed class Solution : ISolution
 {
+    // https://everybody.codes/event/2024/quests/2#:~:text=Part%20I
     public string Solve1(ReadOnlySpan<char> input)
     {
         input = input[6..];
@@ -36,6 +37,7 @@ public sealed class Solution : ISolution
         }
     }
 
+    // https://everybody.codes/event/2024/quests/2#:~:text=Part%20II
     public string Solve2(ReadOnlySpan<char> input)
     {
         input = input[6..];
@@ -69,6 +71,7 @@ public sealed class Solution : ISolution
         }
     }
 
+    // https://everybody.codes/event/2024/quests/2#:~:text=Part%20III
     [AddFinalLineFeed]
     public string Solve3(ReadOnlySpan<char> input)
     {
