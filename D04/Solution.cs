@@ -20,9 +20,7 @@ public sealed class Solution : ISolution
     }
 
     public string Solve2(ReadOnlySpan<char> input)
-    {
-        throw new NotImplementedException();
-    }
+    => Solve1(input);
 
     public string Solve3(ReadOnlySpan<char> input)
     {
