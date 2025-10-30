@@ -8,7 +8,16 @@
     <LangVersion>14</LangVersion>
   </PropertyGroup>
 
+  <ItemGroup Condition="'false'">
+    <ProjectReference Include="lib\EverybodyCodes.Core\EverybodyCodes.Core.csproj" />
+    <Compile Remove="**/obj/**;lib/**" />
+    <EmbeddedResource Remove="**/obj/**;lib/**" />
+    <None Remove="**/obj/**;lib/**" />
+    <Compile Include="lib/EverybodyCodes.Core/Program.cs" />
+  </ItemGroup>
+
   <ItemGroup>
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.4" />
     <PackageReference Include="ZLinq" Version="1.4.8" />
     <PackageReference Include="Cocona.Lite" Version="2.2.0" />
   </ItemGroup>

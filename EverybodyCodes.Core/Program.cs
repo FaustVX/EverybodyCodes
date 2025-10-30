@@ -2,6 +2,7 @@
 using Cocona;
 using EverybodyCodes.Core;
 using EverybodyCodes.Core.Attributes;
+using Newtonsoft.Json.Linq;
 
 var app = CoconaLiteApp.Create(args);
 
@@ -40,7 +41,7 @@ app.AddCommand("get", async ([Argument] int year, [Argument] int day, [Option('s
     var input = await me.GetInputAsync(year, day);
     await Shell.Git.Add($"D{day:00}/");
     await Shell.Git.Commit($"D{day:00}");
-    await Shell.OpenVsCode($"D{day:00}/Solution.cs", $"D{day:00}/input.json");
+    await Shell.VsCode.OpenInExistingWindow($"D{day:00}/Solution.cs", $"D{day:00}/input.json");
 });
 
 app.AddCommand("test", ([Argument] int year, [Argument] int day, [Argument] int part, [Argument]string file) =>
@@ -56,4 +57,50 @@ app.AddCommand("test", ([Argument] int year, [Argument] int day, [Argument] int 
     Console.WriteLine(output);
 });
 
+app.AddCommand("new", async ([Argument] int year, [Option('r')] string repo = "git@github.com:FaustVX/EverybodyCodes.git") =>
+{
+    var worktree = $"../{year}";
+    await Shell.Git.Worktree.Add($"years/{year}", worktree, isOrphan: true);
+    Environment.CurrentDirectory = worktree;
+    var vscode = Directory.CreateDirectory(".vscode");
+    await Shell.Git.Submodule.Add(repo, "lib", "main");
+    var csproj = new FileInfo(Path.Combine("lib", "EverybodyCodes.Core", "EverybodyCodes.Core.csproj"));
+    var launch = new FileInfo(Path.Combine("lib", ".vscode", "launch.json"));
+    var tasks = new FileInfo(Path.Combine("lib", ".vscode", "tasks.json"));
+
+    var text = csproj.ReadToEnd().Replace("'false'", "'true'");
+    File.WriteAllText(Path.Combine(worktree, "EverybodyCodes.csproj"), text);
+    await Shell.Dotnet.New("gitignore");
+    await Shell.Dotnet.New("sln");
+    await Shell.Dotnet.Sln.Add("EverybodyCodes.csproj");
+
+    text = launch.ReadToEnd()
+        .Replace("/EverybodyCodes.Core.dll", "/EverybodyCodes.dll")
+        .Replace("/EverybodyCodes.Core", "")
+        .Replace("${input:year}", year.ToString());
+    var json = JObject.Parse(text);
+    ((JArray)json["inputs"]!)[0].Remove();
+    File.WriteAllText(Path.Combine(vscode.FullName, launch.Name), json.ToString());
+
+    text = tasks.ReadToEnd().Replace("/EverybodyCodes.Core", "/EverybodyCodes.csproj").Replace("${input:year}", year.ToString());
+    json = JObject.Parse(text);
+    ((JArray)json["inputs"]!)[0].Remove();
+    File.WriteAllText(Path.Combine(vscode.FullName, tasks.Name), json.ToString());
+
+    await Shell.Git.Add(".");
+    await Shell.VsCode.OpenInNewWindow(worktree);
+});
+
 app.Run();
+
+file static class Ext
+{
+    extension(FileInfo file)
+    {
+        public string ReadToEnd()
+        {
+            using var fs = file.OpenText();
+            return fs.ReadToEnd();
+        }
+    }
+}
