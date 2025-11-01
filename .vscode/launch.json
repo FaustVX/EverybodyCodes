@@ -42,8 +42,26 @@
         "test",
         "1",
         "${input:day}",
-        "${input:part}",
-        "${input:file}"
+        "${input:file}",
+        "${input:part}"
+      ],
+      "cwd": "${workspaceFolder}",
+      "console": "integratedTerminal",
+      "stopAtEntry": false,
+      "internalConsoleOptions": "openOnSessionStart",
+      "requireExactSource": false
+    },
+    {
+      "name": ".NET Core Launch Test All (Year/Day)",
+      "type": "coreclr",
+      "request": "launch",
+      "preLaunchTask": "build",
+      "program": "${workspaceFolder}/bin/Debug/net10.0/EverybodyCodes.dll",
+      "args": [
+        "test",
+        "1",
+        "${input:day}",
+        "${input:file}",
       ],
       "cwd": "${workspaceFolder}",
       "console": "integratedTerminal",
@@ -62,29 +80,7 @@
         "options": [
           "01",
           "02",
-          "03",
-          "04",
-          "05",
-          "06",
-          "07",
-          "08",
-          "09",
-          "10",
-          "11",
-          "12",
-          "13",
-          "14",
-          "15",
-          "16",
-          "17",
-          "18",
-          "19",
-          "20",
-          "21",
-          "22",
-          "23",
-          "24",
-          "25"
+          "03"
         ],
         "description": "Current day"
       }
