@@ -8,7 +8,7 @@ namespace Y1.D02;
 // https://everybody.codes/story/1/quests/2
 public sealed class Solution : ISolution
 {
-    public string Solve1(ReadOnlySpan<char> input)
+    static string Execute(ReadOnlySpan<char> input)
     {
         var globalParts = (stackalloc Range[10]);
         var nodes = (stackalloc Node<char>[(input.Count('\n') + 1) * 2 + 2]);
@@ -22,6 +22,14 @@ public sealed class Solution : ISolution
                 {
                     nodes[left].Add(ls[0], int.Parse(ln), i++, nodes);
                     nodes[right].Add(rs[0], int.Parse(rn), i++, nodes);
+                    break;
+                }
+                case ["SWAP", var a]:
+                {
+                    var id = int.Parse(a) * 2;
+                    ref var node1 = ref nodes[id];
+                    ref var node2 = ref nodes[id + 1];
+                    (node1, node2) = (node1 with { Name = node2.Name, Value = node2.Value }, node2 with { Name = node1.Name, Value = node1.Value });
                     break;
                 }
             }
@@ -39,10 +47,11 @@ public sealed class Solution : ISolution
         });
     }
 
+    public string Solve1(ReadOnlySpan<char> input)
+    => Execute(input);
+
     public string Solve2(ReadOnlySpan<char> input)
-    {
-        throw new NotImplementedException();
-    }
+    => Execute(input);
 
     public string Solve3(ReadOnlySpan<char> input)
     {
@@ -56,8 +65,8 @@ where T : unmanaged
 {
     public Index Left { get; private set; } = ^0;
     public Index Right { get; private set; } = ^0;
-    public T Name { get; } = Name;
-    public int Value { get; } = Value;
+    public T Name { get; init; } = Name;
+    public int Value { get; init; } = Value;
 
     public void Add(T name, int value, Index index, Span<Node<T>> span)
     {
