@@ -97,11 +97,23 @@ app.AddCommand("new", async ([Argument] int year, [Option('r')] string repo = "g
         .Replace("/EverybodyCodes.Core", "")
         .Replace("${input:year}", year.ToString());
     var json = JObject.Parse(text);
+    if (year < 2000) // Stories
+    {
+        var days = (JArray)json["inputs"]![1]!["args"]!["options"]!;
+        for (var i = days.Count - 1; i >= 3; i--)
+            days[i].Remove();
+    }
     ((JArray)json["inputs"]!)[0].Remove();
     File.WriteAllText(Path.Combine(vscode.FullName, launch.Name), json.ToString());
 
     text = tasks.ReadToEnd().Replace("/EverybodyCodes.Core", "/EverybodyCodes.csproj").Replace("${input:year}", year.ToString());
     json = JObject.Parse(text);
+    if (year < 2000) // Stories
+    {
+        var days = (JArray)json["inputs"]![1]!["args"]!["options"]!;
+        for (var i = days.Count - 1; i >= 3; i--)
+            days[i].Remove();
+    }
     ((JArray)json["inputs"]!)[0].Remove();
     File.WriteAllText(Path.Combine(vscode.FullName, tasks.Name), json.ToString());
 
