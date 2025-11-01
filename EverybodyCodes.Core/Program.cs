@@ -85,6 +85,7 @@ app.AddCommand("new", async ([Argument] int year, [Option('r')] string repo = "g
     var csproj = new FileInfo(Path.Combine("lib", "EverybodyCodes.Core", "EverybodyCodes.Core.csproj"));
     var launch = new FileInfo(Path.Combine("lib", ".vscode", "launch.json"));
     var tasks = new FileInfo(Path.Combine("lib", ".vscode", "tasks.json"));
+    var extensions = new FileInfo(Path.Combine("lib", ".vscode", "extensions.json"));
 
     var text = csproj.ReadToEnd().Replace("'false'", "'true'");
     File.WriteAllText(Path.Combine(worktree, "EverybodyCodes.csproj"), text);
@@ -106,7 +107,9 @@ app.AddCommand("new", async ([Argument] int year, [Option('r')] string repo = "g
     ((JArray)json["inputs"]!)[0].Remove();
     File.WriteAllText(Path.Combine(vscode.FullName, launch.Name), json.ToString());
 
-    text = tasks.ReadToEnd().Replace("/EverybodyCodes.Core", "/EverybodyCodes.csproj").Replace("${input:year}", year.ToString());
+    text = tasks.ReadToEnd()
+        .Replace("/EverybodyCodes.Core", "/EverybodyCodes.csproj")
+        .Replace("${input:year}", year.ToString());
     json = JObject.Parse(text);
     if (year < 2000) // Stories
     {
@@ -116,6 +119,7 @@ app.AddCommand("new", async ([Argument] int year, [Option('r')] string repo = "g
     }
     ((JArray)json["inputs"]!)[0].Remove();
     File.WriteAllText(Path.Combine(vscode.FullName, tasks.Name), json.ToString());
+    File.WriteAllText(Path.Combine(vscode.FullName, extensions.Name), extensions.ReadToEnd());
 
     await Shell.Git.Add(".");
     await Shell.VsCode.OpenInNewWindow(worktree);

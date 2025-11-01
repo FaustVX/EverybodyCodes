@@ -103,11 +103,15 @@
         {
             "id": "file",
             "type": "command",
-            "command": "memento.promptString",
+            "command": "launch-file-picker.pick",
             "args": {
-                "id": "file",
-                "description": "Test file path"
+                "options": {
+                    "title": "Test file path",
+                    "filterRegExp": "test.*",
+                    "filterExt": ".json",
+                    "canChangeFolder": true
+                }
             }
-        },
+        }
     ]
 }
