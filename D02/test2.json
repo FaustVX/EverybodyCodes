@@ -1,5 +1,5 @@
 {
     "1": "ADD id=1 left=[160,E] right=[175,S]\nADD id=2 left=[140,W] right=[224,D]\nADD id=3 left=[122,U] right=[203,F]\nADD id=4 left=[204,N] right=[114,G]\nADD id=5 left=[136,V] right=[256,H]\nADD id=6 left=[147,G] right=[192,O]\nADD id=7 left=[232,I] right=[154,K]\nADD id=8 left=[118,E] right=[125,Y]\nADD id=9 left=[102,A] right=[210,D]\nADD id=10 left=[183,Q] right=[254,E]\nADD id=11 left=[146,E] right=[148,C]\nADD id=12 left=[173,Y] right=[299,S]\nADD id=13 left=[190,B] right=[277,B]\nADD id=14 left=[124,T] right=[142,N]\nADD id=15 left=[153,R] right=[133,M]\nADD id=16 left=[252,D] right=[276,M]\nADD id=17 left=[258,I] right=[245,P]\nADD id=18 left=[117,O] right=[283,!]\nADD id=19 left=[212,O] right=[127,R]\nADD id=20 left=[278,A] right=[169,C]",
     "2": "",
-    "3": ""
+    "3": "ADD id=1 left=[10,A] right=[30,H]\nADD id=2 left=[15,D] right=[25,I]\nADD id=3 left=[12,F] right=[31,J]\nADD id=4 left=[5,B] right=[27,L]\nADD id=5 left=[3,C] right=[28,M]\nSWAP 1\nSWAP 5\nADD id=6 left=[20,G] right=[32,K]\nADD id=7 left=[4,E] right=[21,N]\nSWAP 2\nSWAP 5"
 }

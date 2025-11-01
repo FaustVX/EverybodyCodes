@@ -8,7 +8,7 @@ namespace Y1.D02;
 // https://everybody.codes/story/1/quests/2
 public sealed class Solution : ISolution
 {
-    static string Execute(ReadOnlySpan<char> input)
+    static string Execute(ReadOnlySpan<char> input, bool newSwap)
     {
         var globalParts = (stackalloc Range[10]);
         var nodes = (stackalloc Node<char>[(input.Count('\n') + 1) * 2 + 2]);
@@ -22,6 +22,14 @@ public sealed class Solution : ISolution
                 {
                     nodes[left].Add(ls[0], int.Parse(ln), i++, nodes);
                     nodes[right].Add(rs[0], int.Parse(rn), i++, nodes);
+                    break;
+                }
+                case ["SWAP", var a] when newSwap:
+                {
+                    var id = int.Parse(a) * 2;
+                    ref var node1 = ref nodes[id];
+                    ref var node2 = ref nodes[id + 1];
+                    (node1, node2) = (node2, node1);
                     break;
                 }
                 case ["SWAP", var a]:
@@ -48,15 +56,13 @@ public sealed class Solution : ISolution
     }
 
     public string Solve1(ReadOnlySpan<char> input)
-    => Execute(input);
+    => Execute(input, newSwap: false);
 
     public string Solve2(ReadOnlySpan<char> input)
-    => Execute(input);
+    => Execute(input, newSwap: false);
 
     public string Solve3(ReadOnlySpan<char> input)
-    {
-        throw new NotImplementedException();
-    }
+    => Execute(input, newSwap: true);
 }
 
 [DebuggerDisplay($"{{{nameof(ToString)}(),nq}}")]
