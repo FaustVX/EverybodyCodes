@@ -45,6 +45,15 @@ public sealed record Me(string Name, int Seed, ImmutableDictionary<int, object?>
         return new(null!, year, day, part, Encoding.UTF8.GetString(input[part]), []);
     }
 
+    public static Part[] GetTestInputAsync(int year, int day, string file)
+    {
+        var input = JsonSerializer.Deserialize<Input>(File.ReadAllText(Path.Combine($"D{day:00}", file)))!;
+
+        return [new(null!, year, day, 1, Encoding.UTF8.GetString(input[1]), []),
+        new(null!, year, day, 2, Encoding.UTF8.GetString(input[2]), []),
+        new(null!, year, day, 3, Encoding.UTF8.GetString(input[3]), [])];
+    }
+
     public async Task<Input> GetInputAsync(int year, int day)
     {
         return JsonSerializer.Deserialize<Input>(await GetJson(this, year, day))!;
@@ -124,6 +133,7 @@ public sealed class Solution : ISolution
 
     public sealed record Input([property: JsonPropertyName("1"), JsonConverter(typeof(Input.HexStringConverter))] byte[] A, [property: JsonPropertyName("2"), JsonConverter(typeof(Input.HexStringConverter))] byte[] B, [property: JsonPropertyName("3"), JsonConverter(typeof(Input.HexStringConverter))] byte[] C)
     {
+        /// <param name="index">1-based indexing</param>
         public byte[] this[int index] => index switch
         {
             1 => A,
