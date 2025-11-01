@@ -26,21 +26,17 @@ public sealed class Solution : ISolution
                 }
             }
         (left, right) = (nodes[left].Right!, nodes[right].Right!);
-        return string.Create(100, nodes[left].GetLargestRow(nodes), (span, row) =>
+        var largest = (stackalloc Node<char>[nodes.Length / 2]); // just an approximation
+        var size = nodes[left].GetLargestRow(largest, nodes);
+        size += nodes[right].GetLargestRow(largest[size..], nodes);
+        return string.Create(size, largest[..size], (span, row) =>
         {
             foreach (var node in row)
             {
                 span[0] = node.Name;
                 span = span[1..];
             }
-        }).TrimEnd('\0') + string.Create(100, nodes[right].GetLargestRow(nodes), (span, row) =>
-        {
-            foreach (var node in row)
-            {
-                span[0] = node.Name;
-                span = span[1..];
-            }
-        }).TrimEnd('\0');
+        });
     }
 
     public string Solve2(ReadOnlySpan<char> input)
@@ -56,6 +52,7 @@ public sealed class Solution : ISolution
 
 [DebuggerDisplay($"{{{nameof(ToString)}(),nq}}")]
 file struct Node<T>(T Name, int Value)
+where T : unmanaged
 {
     public Index Left { get; private set; } = ^0;
     public Index Right { get; private set; } = ^0;
@@ -78,23 +75,35 @@ file struct Node<T>(T Name, int Value)
             throw new UnreachableException();
     }
 
-    public readonly IEnumerable<Node<T>> GetRow(int layer, ReadOnlySpan<Node<T>> span)
+    public readonly int GetRow(int layer, Span<Node<T>> destination, ReadOnlySpan<Node<T>> span)
     {
         if (layer == 0)
-            return [this];
-        return [..Left .IsValid ? span[Left].GetRow(layer - 1, span) : [], ..Right.IsValid ? span[Right].GetRow(layer - 1, span) : []];
+        {
+            destination[0] = this;
+            return 1;
+        }
+        var offset = 0;
+        if (Left.IsValid)
+            offset = span[Left].GetRow(layer - 1, destination, span);
+        if (Right.IsValid)
+            offset += span[Right].GetRow(layer - 1, destination[offset..], span);
+        return offset;
     }
 
-    public readonly IEnumerable<Node<T>> GetLargestRow(ReadOnlySpan<Node<T>> span)
+    public readonly int GetLargestRow(Span<Node<T>> destination, ReadOnlySpan<Node<T>> span)
     {
-        IEnumerable<Node<T>> largest = [];
+        var current = (stackalloc Node<T>[destination.Length]);
+        var largestOffset = 0;
         for (var i = 1;; i++)
         {
-            var current = GetRow(i, span);
-            if (!current.Any())
-                return largest;
-            else if (largest.TryGetNonEnumeratedCount(out var c1) && current.TryGetNonEnumeratedCount(out var c2) && c2 > c1)
-                largest = current;
+            var offset = GetRow(i, current, span);
+            if (offset == 0)
+                return largestOffset;
+            else if (offset > largestOffset)
+            {
+                current.CopyTo(destination);
+                largestOffset = offset;
+            }
         }
     }
 
