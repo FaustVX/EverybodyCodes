@@ -11,31 +11,34 @@ public sealed class Solution : ISolution
     public string Solve1(ReadOnlySpan<char> input)
     {
         var globalParts = (stackalloc Range[10]);
-        Node<string> left = new("", 0), right = new("", 0);
+        var nodes = (stackalloc Node<char>[(input.Count('\n') + 1) * 2 + 2]);
+        var i = 0;
+        Index left = i++, right = i++;
+        nodes[left] = nodes[right] = new(' ', 0);
         foreach (var lineRange in input.SplitAny('\n'))
             switch (globalParts[..input[lineRange].SplitAny(globalParts, [' ', '=', ',', '[', ']'], StringSplitOptions.RemoveEmptyEntries)].ToIndexer(input[lineRange]))
             {
                 case ["ADD", _, _, _, var ln, var ls, _, var rn, var rs]:
                 {
-                    var l = left.Add(ls.ToString(), int.Parse(ln));
-                    var r = right.Add(rs.ToString(), int.Parse(rn));
+                    nodes[left].Add(ls[0], int.Parse(ln), i++, nodes);
+                    nodes[right].Add(rs[0], int.Parse(rn), i++, nodes);
                     break;
                 }
             }
-        (left, right) = (left.Right!, right.Right!);
-        return string.Create(100, left.GetLargestRow(), (span, row) =>
+        (left, right) = (nodes[left].Right!, nodes[right].Right!);
+        return string.Create(100, nodes[left].GetLargestRow(nodes), (span, row) =>
         {
             foreach (var node in row)
             {
-                node.Name.CopyTo(span);
-                span = span[node.Name.Length..];
+                span[0] = node.Name;
+                span = span[1..];
             }
-        }).TrimEnd('\0') + string.Create(100, right.GetLargestRow(), (span, row) =>
+        }).TrimEnd('\0') + string.Create(100, nodes[right].GetLargestRow(nodes), (span, row) =>
         {
             foreach (var node in row)
             {
-                node.Name.CopyTo(span);
-                span = span[node.Name.Length..];
+                span[0] = node.Name;
+                span = span[1..];
             }
         }).TrimEnd('\0');
     }
@@ -52,45 +55,42 @@ public sealed class Solution : ISolution
 }
 
 [DebuggerDisplay($"{{{nameof(ToString)}(),nq}}")]
-file sealed class Node<T>(T Name, int Value)
+file struct Node<T>(T Name, int Value)
 {
-    public Node<T>? Left { get; private set; }
-    public Node<T>? Right { get; private set; }
+    public Index Left { get; private set; } = ^0;
+    public Index Right { get; private set; } = ^0;
     public T Name { get; } = Name;
     public int Value { get; } = Value;
 
-    public IEnumerable<Node<T>> this[int layer]
-    {
-        get
-        {
-            if (layer == 0)
-                return [this];
-            return [..Left?[layer - 1] ?? [], ..Right?[layer - 1] ?? []];
-        }
-    }
-
-    public Node<T> Add(T name, int value)
+    public void Add(T name, int value, Index index, Span<Node<T>> span)
     {
         if (value < Value)
-            if (Left is {} l)
-                return l.Add(name, value);
+            if (Left.IsValid)
+                span[Left].Add(name, value, index, span);
             else
-                return Left = new(name, value);
+                span[Left = index] = new(name, value);
         else if (value > Value)
-            if (Right is {} r)
-                return r.Add(name, value);
+            if (Right.IsValid)
+                span[Right].Add(name, value, index, span);
             else
-                return Right = new(name, value);
+                span[Right = index] = new(name, value);
         else
             throw new UnreachableException();
     }
 
-    public IEnumerable<Node<T>> GetLargestRow()
+    public readonly IEnumerable<Node<T>> GetRow(int layer, ReadOnlySpan<Node<T>> span)
+    {
+        if (layer == 0)
+            return [this];
+        return [..Left .IsValid ? span[Left].GetRow(layer - 1, span) : [], ..Right.IsValid ? span[Right].GetRow(layer - 1, span) : []];
+    }
+
+    public readonly IEnumerable<Node<T>> GetLargestRow(ReadOnlySpan<Node<T>> span)
     {
         IEnumerable<Node<T>> largest = [];
         for (var i = 1;; i++)
         {
-            var current = this[i];
+            var current = GetRow(i, span);
             if (!current.Any())
                 return largest;
             else if (largest.TryGetNonEnumeratedCount(out var c1) && current.TryGetNonEnumeratedCount(out var c2) && c2 > c1)
@@ -98,6 +98,15 @@ file sealed class Node<T>(T Name, int Value)
         }
     }
 
-    public override string ToString()
+    public override readonly string ToString()
     => $"{Name}: {Value} [< {Left} > {Right}]";
+}
+
+file static class Ext
+{
+    extension(Index index)
+    {
+        public bool IsValid
+        => index is not { IsFromEnd: true, Value: 0 };
+    }
 }
