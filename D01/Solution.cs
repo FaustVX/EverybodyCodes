@@ -1,5 +1,7 @@
 using ZLinq;
+using ZLinq.Simd;
 using EverybodyCodes.Core;
+using System.Diagnostics;
 
 namespace Y1.D01;
 
@@ -16,7 +18,7 @@ public sealed class Solution : ISolution
         foreach (var range in input.SplitAny('\n'))
             lines[i++] = Line.Parse(input[range]);
         return lines.AsValueEnumerable()
-            .Select(l => l.Calculate(maxRemainders))
+            .Select(maxRemainders < 0 ? new Func<Line, long>(l => l.Calculate()) : l => l.Calculate(maxRemainders))
             .Max();
     }
 
@@ -24,9 +26,7 @@ public sealed class Solution : ISolution
     => Calculate(input, 5).ToString();
 
     public string Solve3(ReadOnlySpan<char> input)
-    {
-        throw new NotImplementedException();
-    }
+    => Calculate(input, -1).ToString();
 }
 
 file readonly record struct Line(int A, int B, int C, long X, long Y, long Z, int M)
@@ -41,7 +41,10 @@ file readonly record struct Line(int A, int B, int C, long X, long Y, long Z, in
     public long Calculate(int maxRemainders)
     => Eni(A, X, M, maxRemainders) + Eni(B, Y, M, maxRemainders) + Eni(C, Z, M, maxRemainders);
 
-    public static long Eni(int n, long exp, int mod, int maxRemainders)
+    public long Calculate()
+    => Eni(A, X, M) + Eni(B, Y, M) + Eni(C, Z, M);
+
+    static long Eni(int n, long exp, int mod, int maxRemainders)
     {
         var score = 1L;
         if (maxRemainders > 0 && exp > maxRemainders)
@@ -69,6 +72,25 @@ file readonly record struct Line(int A, int B, int C, long X, long Y, long Z, in
                 result *= n;
             return (int)(result % mod);
         }
+    }
+
+    static long Eni(int n, long exp, int mod)
+    {
+        var scores = (stackalloc int[mod]);
+        var score = 1;
+        for (var i = 0; i < mod; i++)
+            if (scores[..i].Contains(scores[i] = score = score * n % mod))
+            {
+                var before = scores[..scores.IndexOf(score)];
+                var loop = scores[scores.IndexOf(score)..i];
+                var after = loop[..(int)((exp - before.Length) % loop.Length)];
+                var result = (long)loop.AsVectorizable().Sum();
+                result *= (exp - before.Length) / loop.Length;
+                result += before.AsVectorizable().Sum();
+                result += after.AsVectorizable().Sum();
+                return result;
+            }
+        throw new UnreachableException();
     }
 }
 
