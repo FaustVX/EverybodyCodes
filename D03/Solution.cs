@@ -24,7 +24,18 @@ public sealed class Solution : ISolution
 
     public string Solve2(ReadOnlySpan<char> input)
     {
-        throw new NotImplementedException();
+        var snails = (stackalloc Snail[input.Count('\n') + 1]);
+        var i = 0;
+        foreach (var lineRange in input.SplitAny('\n'))
+            snails[i++] = Snail.Parse(input[lineRange]);
+        for (var day = 0; ; day++)
+        {
+            var allOnGoldenLine = true;
+            foreach (ref var snail in snails)
+                allOnGoldenLine &= snail.Move();
+            if (allOnGoldenLine)
+                return day.ToString();
+        }
     }
 
     public string Solve3(ReadOnlySpan<char> input)
