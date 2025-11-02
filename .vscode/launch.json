@@ -37,7 +37,7 @@
             "preLaunchTask": "build",
             // If you have changed target frameworks, make sure to update the program path.
             "program": "${workspaceFolder}/EverybodyCodes.Core/bin/Debug/net10.0/EverybodyCodes.Core.dll",
-            "args": ["test", "${input:year}", "${input:day}", "${input:file}", "${input:part}"],
+            "args": ["test", "${input:year}", "${input:day}", "${input:part}", "--file", "${input:file}"],
             "cwd": "${workspaceFolder}/EverybodyCodes.Core",
             // For more information about the 'console' field, see https://github.com/OmniSharp/omnisharp-vscode/blob/master/debugger-launchjson.md#console-terminal-window
             "console": "integratedTerminal",
@@ -52,7 +52,7 @@
             "preLaunchTask": "build",
             // If you have changed target frameworks, make sure to update the program path.
             "program": "${workspaceFolder}/EverybodyCodes.Core/bin/Debug/net10.0/EverybodyCodes.Core.dll",
-            "args": ["test", "${input:year}", "${input:day}", "${input:file}"],
+            "args": ["test", "${input:year}", "${input:day}", "--file", "${input:file}"],
             "cwd": "${workspaceFolder}/EverybodyCodes.Core",
             // For more information about the 'console' field, see https://github.com/OmniSharp/omnisharp-vscode/blob/master/debugger-launchjson.md#console-terminal-window
             "console": "integratedTerminal",

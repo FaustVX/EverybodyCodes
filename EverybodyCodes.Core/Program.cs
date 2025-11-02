@@ -44,7 +44,7 @@ app.AddCommand("get", async ([Argument] int year, [Argument] int day, [Option('s
     await Shell.VsCode.OpenInExistingWindow($"D{day:00}/Solution.cs", $"D{day:00}/input.json");
 });
 
-app.AddCommand("test", ([Argument] int year, [Argument] int day, [Argument]string file, [Argument] int? part) =>
+app.AddCommand("test", ([Argument] int year, [Argument] int day, [Argument] int? part, [Option('f')]string file) =>
 {
     if (part is int p)
     {
