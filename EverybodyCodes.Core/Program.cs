@@ -17,7 +17,7 @@ app.AddCommand("run", async ([Argument] int year, [Argument] int day, [Argument]
     var startTime = TimeProvider.System.GetTimestamp();
     var output = solution.Solve(part, input1);
     Console.WriteLine(TimeProvider.System.GetElapsedTime(startTime));
-    Console.WriteLine($"Y{year}D{day:00}P{part} : {output}");
+    Console.WriteLine($"Y{year}D{day:00}P{part} : {output} ({input.Answers[part - 1]})");
     var response = await input.AnswerAsync(output);
     Console.WriteLine(response);
     if (response.IsCorrect && response.Time != default)
@@ -48,29 +48,31 @@ app.AddCommand("test", ([Argument] int year, [Argument] int day, [Argument] int?
 {
     if (part is int p)
     {
-        var input = Me.GetTestInputAsync(year, day, p, file);
+        var input = Me.GetTestInput(year, day, p, file);
         var type = Assembly.GetEntryAssembly()!.GetType($"Y{year}.D{day:00}.Solution");
         var solution = (ISolution)Activator.CreateInstance(type!)!;
         var addFinalLF = type!.GetMethod($"Solve{p}")!.CustomAttributes.Any(a => a.AttributeType == typeof(AddFinalLineFeedAttribute));
-        var input1 = addFinalLF ? input.Input + "\n" : input.Input;
+        var input1 = addFinalLF ? input!.Input + "\n" : input!.Input;
         var startTime = TimeProvider.System.GetTimestamp();
         var output = solution.Solve(p, input1);
         Console.WriteLine(TimeProvider.System.GetElapsedTime(startTime));
-        Console.WriteLine($"Y{year}D{day:00}P{p} : {output}");
+        Console.WriteLine($"Y{year}D{day:00}P{p} : {output} ({input.Answers[p - 1]})");
     }
     else
     {
-        var input = Me.GetTestInputAsync(year, day, file);
+        var input = Me.GetTestInput(year, day, file);
         var type = Assembly.GetEntryAssembly()!.GetType($"Y{year}.D{day:00}.Solution");
         var solution = (ISolution)Activator.CreateInstance(type!)!;
         for (var i = 0; i < input.Length; i++)
         {
+            if (input[i] is not {} a)
+                continue;
             var addFinalLF = type!.GetMethod($"Solve{i + 1}")!.CustomAttributes.Any(a => a.AttributeType == typeof(AddFinalLineFeedAttribute));
-            var input1 = addFinalLF ? input[i].Input + "\n" : input[i].Input;
+            var input1 = addFinalLF ? a.Input + "\n" : a.Input;
             var startTime = TimeProvider.System.GetTimestamp();
             var output = solution.Solve(i + 1, input1);
             Console.WriteLine(TimeProvider.System.GetElapsedTime(startTime));
-            Console.WriteLine($"Y{year}D{day:00}P{i + 1} : {output}");
+            Console.WriteLine($"Y{year}D{day:00}P{i + 1} : {output} ({a.Answers[i]})");
         }
     }
 });

@@ -39,20 +39,17 @@ public sealed record Me(string Name, int Seed, ImmutableDictionary<int, object?>
             ]);
     }
 
-    public static Part GetTestInputAsync(int year, int day, int part, string file)
+    public static Part? GetTestInput(int year, int day, int part, string file)
+    => GetTestInput(year, day, file)[part - 1];
+
+    public static Part?[] GetTestInput(int year, int day, string file)
     {
-        var input = JsonSerializer.Deserialize<Input>(File.ReadAllText(Path.Combine($"D{day:00}", file)))!;
+        var input = JsonSerializer.Deserialize<TestInput>(File.ReadAllText(Path.Combine($"D{day:00}", file)))!;
+        ImmutableArray<string> answer = [input[1]?.answer!, input[2]?.answer!, input[3]?.answer!];
 
-        return new(null!, year, day, part, Encoding.UTF8.GetString(input[part]), []);
-    }
-
-    public static Part[] GetTestInputAsync(int year, int day, string file)
-    {
-        var input = JsonSerializer.Deserialize<Input>(File.ReadAllText(Path.Combine($"D{day:00}", file)))!;
-
-        return [new(null!, year, day, 1, Encoding.UTF8.GetString(input[1]), []),
-        new(null!, year, day, 2, Encoding.UTF8.GetString(input[2]), []),
-        new(null!, year, day, 3, Encoding.UTF8.GetString(input[3]), [])];
+        return [input[1] is {} i1 ? new(null!, year, day, 1, i1.input, answer) : null,
+        input[2] is {} i2 ? new(null!, year, day, 2, i2.input, answer) : null,
+        input[3] is {} i3 ? new(null!, year, day, 3, i3.input, answer) : null];
     }
 
     public async Task<Input> GetInputAsync(int year, int day)
@@ -70,9 +67,9 @@ public sealed record Me(string Name, int Seed, ImmutableDictionary<int, object?>
                 throw new InvalidOperationException($"Day {day} of {year} is not yet available (available from {availableFrom.LocalDateTime:U}).");
         }
 
-        return JsonSerializer.Deserialize<Input>(await GetJson(this, year, day))!;
+        return JsonSerializer.Deserialize<Input>(await GetJsonAsync(this, year, day))!;
 
-        static async Task<string> GetJson(Me me, int year, int day)
+        static async Task<string> GetJsonAsync(Me me, int year, int day)
         {
             var path = Path.Combine($"D{day:00}", "input.json");
             if (File.Exists(path))
@@ -84,6 +81,7 @@ public sealed record Me(string Name, int Seed, ImmutableDictionary<int, object?>
             var json = (await clientCdn.GetStringAsync($"/assets/{year}/{day}/input/{me.Seed}.json"))!;
             CreateParentDir(Path.GetDirectoryName(path)!);
             CreateSolutionFile(year, day);
+            CreateTestFile(year, day);
             File.WriteAllText(path, json);
             return json;
 
@@ -127,6 +125,24 @@ public sealed class Solution : ISolution
 }
 """);
         }
+
+        static void CreateTestFile(int year, int day)
+        {
+            var path = Path.Combine($"D{day:00}", "test1.json");
+            if (File.Exists(path))
+                return;
+            File.WriteAllText(path, """
+{
+    "1": {
+        "input": "",
+        "answer": ""
+    },
+    "2": null,
+    "3": null
+}
+
+""");
+        }
     }
 
     private static string DecryptStringFromBytes_Aes(Input input, Key key, int part)
@@ -159,21 +175,25 @@ public sealed class Solution : ISolution
         sealed class HexStringConverter : JsonConverter<byte[]>
         {
             public override byte[]? Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
-            {
-                var r = reader;
-                try
-                {
-                    return Convert.FromHexString(reader.GetString()!);
-                }
-                catch (FormatException)
-                {
-                    return Encoding.UTF8.GetBytes(r.GetString()!);
-                }
-            }
+            => Convert.FromHexString(reader.GetString()!);
 
             public override void Write(Utf8JsonWriter writer, byte[] value, JsonSerializerOptions options)
             => writer.WriteStringValue(Convert.ToHexString(value));
         }
+    }
+
+    private sealed record TestInput([property: JsonPropertyName("1")] TestInput.Part? A, [property: JsonPropertyName("2")] TestInput.Part? B, [property: JsonPropertyName("3")] TestInput.Part? C)
+    {
+        /// <param name="index">1-based indexing</param>
+        public Part? this[int index] => index switch
+        {
+            1 => A,
+            2 => B,
+            3 => C,
+            _ => throw new IndexOutOfRangeException(),
+        };
+
+        public readonly record struct Part(string input, string answer);
     }
 
     readonly record struct Key(string? Key1, string? Answer1, string? Key2, string? Answer2, string? Key3, string? Answer3)
