@@ -1,5 +1,14 @@
 {
-    "1": "ADD id=1 left=[10,A] right=[30,H]\nADD id=2 left=[15,D] right=[25,I]\nADD id=3 left=[12,F] right=[31,J]\nADD id=4 left=[5,B] right=[27,L]\nADD id=5 left=[3,C] right=[28,M]\nADD id=6 left=[20,G] right=[32,K]\nADD id=7 left=[4,E] right=[21,N]",
-    "2": "ADD id=1 left=[10,A] right=[30,H]\nADD id=2 left=[15,D] right=[25,I]\nADD id=3 left=[12,F] right=[31,J]\nADD id=4 left=[5,B] right=[27,L]\nADD id=5 left=[3,C] right=[28,M]\nSWAP 1\nSWAP 5\nADD id=6 left=[20,G] right=[32,K]\nADD id=7 left=[4,E] right=[21,N]",
-    "3": "ADD id=1 left=[10,A] right=[30,H]\nADD id=2 left=[15,D] right=[25,I]\nADD id=3 left=[12,F] right=[31,J]\nADD id=4 left=[5,B] right=[27,L]\nADD id=5 left=[3,C] right=[28,M]\nSWAP 1\nSWAP 5\nADD id=6 left=[20,G] right=[32,K]\nADD id=7 left=[4,E] right=[21,N]\nSWAP 2"
+    "1": {
+        "input": "ADD id=1 left=[10,A] right=[30,H]\nADD id=2 left=[15,D] right=[25,I]\nADD id=3 left=[12,F] right=[31,J]\nADD id=4 left=[5,B] right=[27,L]\nADD id=5 left=[3,C] right=[28,M]\nADD id=6 left=[20,G] right=[32,K]\nADD id=7 left=[4,E] right=[21,N]",
+        "answer": "CFGNLK"
+    },
+    "2": {
+        "input": "ADD id=1 left=[10,A] right=[30,H]\nADD id=2 left=[15,D] right=[25,I]\nADD id=3 left=[12,F] right=[31,J]\nADD id=4 left=[5,B] right=[27,L]\nADD id=5 left=[3,C] right=[28,M]\nSWAP 1\nSWAP 5\nADD id=6 left=[20,G] right=[32,K]\nADD id=7 left=[4,E] right=[21,N]",
+        "answer": "MGFLNK"
+    },
+    "3": {
+        "input": "ADD id=1 left=[10,A] right=[30,H]\nADD id=2 left=[15,D] right=[25,I]\nADD id=3 left=[12,F] right=[31,J]\nADD id=4 left=[5,B] right=[27,L]\nADD id=5 left=[3,C] right=[28,M]\nSWAP 1\nSWAP 5\nADD id=6 left=[20,G] right=[32,K]\nADD id=7 left=[4,E] right=[21,N]\nSWAP 2",
+        "answer": "DJMGL"
+    }
 }
