@@ -86,6 +86,7 @@ app.AddCommand("new", async ([Argument] int year, [Option('r')] string repo = "g
     var launch = new FileInfo(Path.Combine("lib", ".vscode", "launch.json"));
     var tasks = new FileInfo(Path.Combine("lib", ".vscode", "tasks.json"));
     var extensions = new FileInfo(Path.Combine("lib", ".vscode", "extensions.json"));
+    var settings = new FileInfo(Path.Combine("lib", ".vscode", "settings.json"));
 
     var text = csproj.ReadToEnd().Replace("'false'", "'true'");
     File.WriteAllText(Path.Combine(worktree, "EverybodyCodes.csproj"), text);
@@ -120,6 +121,7 @@ app.AddCommand("new", async ([Argument] int year, [Option('r')] string repo = "g
     ((JArray)json["inputs"]!)[0].Remove();
     File.WriteAllText(Path.Combine(vscode.FullName, tasks.Name), json.ToString());
     File.WriteAllText(Path.Combine(vscode.FullName, extensions.Name), extensions.ReadToEnd());
+    File.WriteAllText(Path.Combine(vscode.FullName, settings.Name), settings.ReadToEnd());
 
     await Shell.Git.Add(".");
     await Shell.VsCode.OpenInNewWindow(worktree);
