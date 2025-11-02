@@ -46,6 +46,7 @@ app.AddCommand("get", async ([Argument] int year, [Argument] int day, [Option('s
 
 app.AddCommand("test", ([Argument] int year, [Argument] int day, [Argument] int? part, [Option('f')]string file) =>
 {
+    Console.WriteLine("Test file: " + Path.GetRelativePath(Path.GetFullPath($"D{day:00}"), file));
     if (part is int p)
     {
         var input = Me.GetTestInput(year, day, p, file);
