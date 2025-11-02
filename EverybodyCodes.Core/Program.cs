@@ -75,13 +75,13 @@ app.AddCommand("test", ([Argument] int year, [Argument] int day, [Argument]strin
     }
 });
 
-app.AddCommand("new", async ([Argument] int year, [Option('r')] string repo = "git@github.com:FaustVX/EverybodyCodes.git") =>
+app.AddCommand("new", async ([Argument] int year, [Option('r')] string repo = "git@github.com:FaustVX/EverybodyCodes.git", [Option('b')] string branch = "main") =>
 {
     var worktree = $"../{year}";
     await Shell.Git.Worktree.Add($"years/{year}", worktree, isOrphan: true);
     Environment.CurrentDirectory = worktree;
     var vscode = Directory.CreateDirectory(".vscode");
-    await Shell.Git.Submodule.Add(repo, "lib", "main");
+    await Shell.Git.Submodule.Add(repo, "lib", branch);
     var csproj = new FileInfo(Path.Combine("lib", "EverybodyCodes.Core", "EverybodyCodes.Core.csproj"));
     var launch = new FileInfo(Path.Combine("lib", ".vscode", "launch.json"));
     var tasks = new FileInfo(Path.Combine("lib", ".vscode", "tasks.json"));
