@@ -2,6 +2,7 @@ using ZLinq;
 using EverybodyCodes.Core;
 using EverybodyCodes.Core.Extensions;
 using System.Diagnostics;
+using System.Numerics;
 
 namespace Y1.D03;
 
@@ -23,24 +24,26 @@ public sealed class Solution : ISolution
     }
 
     public string Solve2(ReadOnlySpan<char> input)
+    => Execute(input).ToString();
+
+    public string Solve3(ReadOnlySpan<char> input)
+    => Execute(input).ToString();
+
+    // Chinese Remainder Theorem
+    static long Execute(ReadOnlySpan<char> input)
     {
         var snails = (stackalloc Snail[input.Count('\n') + 1]);
         var i = 0;
         foreach (var lineRange in input.SplitAny('\n'))
             snails[i++] = Snail.Parse(input[lineRange]);
-        for (var day = 0; ; day++)
+        var (days, totalSize) = (0L, 1L);
+        foreach (ref var snail in snails)
         {
-            var allOnGoldenLine = true;
-            foreach (ref var snail in snails)
-                allOnGoldenLine &= snail.Move();
-            if (allOnGoldenLine)
-                return day.ToString();
+            while ((snail.X + 1 + days) % snail.LoopSize != 0)
+                days += totalSize;
+            totalSize *= snail.LoopSize;
         }
-    }
-
-    public string Solve3(ReadOnlySpan<char> input)
-    {
-        throw new NotImplementedException();
+        return days;
     }
 }
 
@@ -57,15 +60,17 @@ file record struct Snail(int X, int Y)
     public readonly int PosFormula
     => X + 1 + 100 * (Y + 1);
 
-    public bool Move()
+    public readonly int LoopSize
+    => X + Y + 1;
+
+    public void Move()
     {
-        if (Y <= 0)
+        if (Y > 0)
         {
-            (Y, X) = (X, 0);
-            return true;
+            Y--;
+            X++;
+            return;
         }
-        Y--;
-        X++;
-        return false;
+        (Y, X) = (X, 0);
     }
 }
