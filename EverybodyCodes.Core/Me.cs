@@ -60,11 +60,11 @@ public sealed record Me(string Name, int Seed, ImmutableDictionary<int, object?>
                 throw new ArgumentOutOfRangeException(nameof(day), "Day must be between 1 and 20.");
 
             var now = TimeProvider.GetUtcNow();
-            // Event opens every year on 4 November at 23:00 UTC
-            var availableFrom = new DateTimeOffset(year, 11, 4, 23, 0, 0, TimeSpan.Zero).AddDays(day - 1); // day 1 -> start, day 2 -> start + 1 day, ...
+            // Event opens every year on 3 November at 23:00 UTC
+            var availableFrom = new DateTimeOffset(year, 11, 3, 23, 0, 0, TimeSpan.Zero).AddDays(day - 1); // day 1 -> start, day 2 -> start + 1 day, ...
 
             if (now < availableFrom)
-                throw new InvalidOperationException($"Day {day} of {year} is not yet available (available from {availableFrom.LocalDateTime:U}).");
+                throw new InvalidOperationException($"Day {day} of {year} is not yet available (available from {availableFrom.LocalDateTime:F}).");
         }
 
         return JsonSerializer.Deserialize<Input>(await GetJsonAsync(this, year, day))!;
