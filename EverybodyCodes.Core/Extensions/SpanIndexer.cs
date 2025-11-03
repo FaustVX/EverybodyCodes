@@ -19,7 +19,7 @@ public readonly ref struct SpanIndexer<T>(ReadOnlySpan<Range> ranges, ReadOnlySp
     [DebuggerStepThrough]
     public ref struct Enumerator(SpanIndexer<T> indexer) : IEnumerator<ReadOnlySpan<T>>
     {
-        private int _index = 0;
+        private int _index = -1;
         private readonly SpanIndexer<T> indexer = indexer;
 
         public readonly ReadOnlySpan<T> Current
