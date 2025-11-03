@@ -17,7 +17,10 @@ app.AddCommand("run", async ([Argument] int year, [Argument] int day, [Argument]
     var startTime = TimeProvider.System.GetTimestamp();
     var output = solution.Solve(part, input1);
     Console.WriteLine(TimeProvider.System.GetElapsedTime(startTime));
-    Console.WriteLine($"Y{year}D{day:00}P{part} : {output} ({input.Answers[part - 1]})");
+    if (input.Answers.Length > part - 1)
+        Console.WriteLine($"Y{year}D{day:00}P{part} : {output} ({input.Answers[part - 1]})");
+    else
+        Console.WriteLine($"Y{year}D{day:00}P{part} : {output}");
     var response = await input.AnswerAsync(output);
     Console.WriteLine(response);
     if (response.IsCorrect && response.Time != default)
