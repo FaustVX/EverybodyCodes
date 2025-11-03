@@ -1,6 +1,6 @@
 # EverybodyCodes
 
-Lightweight command-line runner and helpers for [Everybody.Codes](https://everybody.codes/) puzzles and events.
+Lightweight command-line runner and helpers for <a href="https://everybody.codes/" target="_blank">Everybody.Codes</a> puzzles and events.
 
 ## Overview
 
@@ -9,8 +9,8 @@ This repository contains the core runner, utilities and CLI commands used to fet
 ## Quickstart
 
 Prerequisites:
-- [.NET 10 SDK](https://dotnet.microsoft.com/download/dotnet/10.0)
-- [Everybody.Codes](https://everybody.codes/)  account session cookie
+- <a href="https://dotnet.microsoft.com/download/dotnet/10.0" target="_blank">.NET 10 SDK</a>
+- <a href="https://everybody.codes/" target="_blank">Everybody.Codes</a> account session cookie
 
 Build:
 ```sh
