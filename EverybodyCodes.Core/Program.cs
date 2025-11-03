@@ -52,7 +52,12 @@ app.AddCommand("test", ([Argument] int year, [Argument] int day, [Argument] int?
     Console.WriteLine("Test file: " + Path.GetRelativePath(Path.GetFullPath($"D{day:00}"), file));
     if (part is int p)
     {
-        var input = Me.GetTestInput(year, day, p, file);
+        if (Me.GetTestInput(year, day, p, file) is not {} input)
+        {
+            Console.WriteLine($"The part {p} in test file is null");
+            return;
+        }
+
         var type = Assembly.GetEntryAssembly()!.GetType($"Y{year}.D{day:00}.Solution");
         var solution = (ISolution)Activator.CreateInstance(type!)!;
         var addFinalLF = type!.GetMethod($"Solve{p}")!.CustomAttributes.Any(a => a.AttributeType == typeof(AddFinalLineFeedAttribute));
