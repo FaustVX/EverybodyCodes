@@ -127,6 +127,7 @@ app.AddCommand("new", async ([Argument] int year, [Option('r')] string repo = "g
     File.WriteAllText(Path.Combine(vscode.FullName, settings.Name), settings.ReadToEnd());
 
     await Shell.Git.Add(".");
+    await Shell.Git.Commit(year.ToString());
     await Shell.VsCode.OpenInNewWindow(worktree);
 });
 
