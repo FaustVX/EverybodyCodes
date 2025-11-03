@@ -33,7 +33,21 @@ public sealed class Solution : ISolution
 
     public string Solve2(ReadOnlySpan<char> input)
     {
-        throw new NotImplementedException();
+        var names = input[..input.IndexOf('\n')];
+        var ranges = (stackalloc Range[names.Count(',') + 1]);
+        names.Split(ranges, ',');
+        var index = 0;
+        var instructions = input[(input.IndexOf('\n') + 2)..];
+        foreach (var instruction in instructions.Split(','))
+            index = instructions[instruction] switch 
+            {
+                ['R', .. var dir] when int.TryParse(dir, out var a)
+                    => (index + a) % ranges.Length,
+                ['L', .. var dir] when int.TryParse(dir, out var a)
+                    => ((index - a) % ranges.Length + ranges.Length) % ranges.Length,
+                _ => throw new UnreachableException(),
+            };
+        return names[ranges[index]].ToString();
     }
 
     public string Solve3(ReadOnlySpan<char> input)
