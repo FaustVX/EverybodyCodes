@@ -80,7 +80,9 @@ app.AddCommand("test", ([Argument] int year, [Argument] int day, [Argument] int?
 
 app.AddCommand("new", async ([Argument] int year, [Option('r')] string repo = "git@github.com:FaustVX/EverybodyCodes.git", [Option('b')] string branch = "main") =>
 {
-    var worktree = $"../{year}";
+#pragma warning disable CS9193 // Argument should be a variable because it is passed to a 'ref readonly' parameter
+    var worktree = Path.Combine(["..", ..!Directory.Exists("lib") ? new ReadOnlySpan<string>("..") : [], year.ToString()]);
+#pragma warning restore CS9193 // Argument should be a variable because it is passed to a 'ref readonly' parameter
     await Shell.Git.Worktree.Add($"years/{year}", worktree, isOrphan: true);
     Environment.CurrentDirectory = worktree;
     var vscode = Directory.CreateDirectory(".vscode");
@@ -92,7 +94,7 @@ app.AddCommand("new", async ([Argument] int year, [Option('r')] string repo = "g
     var settings = new FileInfo(Path.Combine("lib", ".vscode", "settings.json"));
 
     var text = csproj.ReadToEnd().Replace("'false'", "'true'");
-    File.WriteAllText(Path.Combine(worktree, "EverybodyCodes.csproj"), text);
+    File.WriteAllText("EverybodyCodes.csproj", text);
     await Shell.Dotnet.New("gitignore");
     await Shell.Dotnet.New("sln");
     await Shell.Dotnet.Sln.Add("EverybodyCodes.csproj");
@@ -128,7 +130,7 @@ app.AddCommand("new", async ([Argument] int year, [Option('r')] string repo = "g
 
     await Shell.Git.Add(".");
     await Shell.Git.Commit(year.ToString());
-    await Shell.VsCode.OpenInNewWindow(worktree);
+    await Shell.VsCode.OpenInNewWindow("./");
 });
 
 app.Run();
