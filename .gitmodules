@@ -1,0 +1,4 @@
+[submodule "lib"]
+	path = lib
+	url = git@github.com:FaustVX/EverybodyCodes.git
+	branch = main
