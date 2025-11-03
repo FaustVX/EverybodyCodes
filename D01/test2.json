@@ -1,0 +1,8 @@
+{
+    "1": {
+        "input": "*.*.*.*.*.*.*.*.*\n.*.*.*.*.*.*.*.*.\n*.*.*...*.*...*..\n.*.*.*.*.*...*.*.\n*.*.....*...*.*.*\n.*.*.*.*.*.*.*.*.\n*...*...*.*.*.*.*\n.*.*.*.*.*.*.*.*.\n*.*.*...*.*.*.*.*\n.*...*...*.*.*.*.\n*.*.*.*.*.*.*.*.*\n.*.*.*.*.*.*.*.*.\n\nRRRLRLRRRRRL\nLLLLRLRRRRRR\nRLLLLLRLRLRL\nLRLLLRRRLRLR\nLLRLLRLLLRRL\nLRLRLLLRRRRL\nLRLLLLLLRLLL\nRRLLLRLLRLRR\nRLLLLLRLLLRL",
+        "answer": "26"
+    },
+    "2": null,
+    "3": null
+}

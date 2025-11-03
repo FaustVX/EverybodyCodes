@@ -20,6 +20,7 @@
     <PackageReference Include="Newtonsoft.Json" Version="13.0.4" />
     <PackageReference Include="ZLinq" Version="1.4.8" />
     <PackageReference Include="Cocona.Lite" Version="2.2.0" />
+    <PackageReference Include="CommunityToolkit.HighPerformance" Version="8.4.0" />
   </ItemGroup>
 
 </Project>

@@ -1,7 +1,7 @@
 {
     "1": {
-        "input": "",
-        "answer": ""
+        "input": "*.*.*.*.*\n.*.*.*.*.\n*...*.*.*\n.*.*...*.\n*.*...*..\n.*.*.*.*.\n\nRRRRRR\nRRRRRR\nRRRRRR\nRLLRLR\nRLLRLR",
+        "answer": "25"
     },
     "2": null,
     "3": null
