@@ -1,7 +1,7 @@
 {
     "1": {
-        "input": "",
-        "answer": ""
+        "input": "Vyrdax,Drakzyph,Fyrryn,Elarzris\n\nR3,L2,R3,L1",
+        "answer": "Fyrryn"
     },
     "2": null,
     "3": null

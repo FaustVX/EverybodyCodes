@@ -2,15 +2,33 @@ using ZLinq;
 using CommunityToolkit.HighPerformance;
 using EverybodyCodes.Core;
 using EverybodyCodes.Core.Extensions;
+using System.Linq.Expressions;
 
 namespace Y2025.D01;
+
+using System;
+using System.Diagnostics;
 
 // https://everybody.codes/event/2025/quests/1
 public sealed class Solution : ISolution
 {
     public string Solve1(ReadOnlySpan<char> input)
     {
-        throw new NotImplementedException();
+        var names = input[..input.IndexOf('\n')];
+        var ranges = (stackalloc Range[names.Count(',') + 1]);
+        names.Split(ranges, ',');
+        var index = 0;
+        var instructions = input[(input.IndexOf('\n') + 2)..];
+        foreach (var instruction in instructions.Split(','))
+            index = instructions[instruction] switch 
+            {
+                ['R', .. var dir] when int.TryParse(dir, out var a)
+                    => Math.Min(index + a, ranges.Length - 1),
+                ['L', .. var dir] when int.TryParse(dir, out var a)
+                    => Math.Max(index - a, 0),
+                _ => throw new UnreachableException(),
+            };
+        return names[ranges[index]].ToString();
     }
 
     public string Solve2(ReadOnlySpan<char> input)
