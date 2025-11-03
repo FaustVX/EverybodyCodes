@@ -52,6 +52,31 @@ public sealed class Solution : ISolution
 
     public string Solve3(ReadOnlySpan<char> input)
     {
-        throw new NotImplementedException();
+        var names = input[..input.IndexOf('\n')];
+        var ranges = (stackalloc Range[names.Count(',') + 1]);
+        names.Split(ranges, ',');
+        var instructions = input[(input.IndexOf('\n') + 2)..];
+        foreach (var instruction in instructions.Split(','))
+            switch (instructions[instruction])
+            {
+                case ['R', .. var dir] when int.TryParse(dir, out var a):
+                    ranges[0].SwapWith(ref ranges[a % ranges.Length]);
+                    break;
+                case ['L', .. var dir] when int.TryParse(dir, out var a):
+                    ranges[0].SwapWith(ref ranges[(-a % ranges.Length + ranges.Length) % ranges.Length]);
+                    break;
+                default: throw new UnreachableException();
+            };
+        return names[ranges[0]].ToString();
+    }
+}
+
+file static class Ext
+{
+    extension<T>(ref T value)
+    where T : unmanaged
+    {
+        public void SwapWith(ref T other)
+        => (value, other) = (other, value);
     }
 }
