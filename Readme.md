@@ -43,8 +43,10 @@ Implemented in the CLI runner: see [`EverybodyCodes.Core.Program`](EverybodyCode
 
 Usage:
 ```sh
+cd EverybodyCodes.Core
 dotnet run -- new <year> [-r <git repo> ] [-b <branch>]
 # examples
+cd EverybodyCodes.Core
 dotnet run -- new 2026
 dotnet run -- new 2026 -r git@github.com:YourUser/EverybodyCodes.git -b main
 ```
