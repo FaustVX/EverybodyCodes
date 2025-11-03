@@ -41,7 +41,7 @@ app.AddCommand("get", async ([Argument] int year, [Argument] int day, [Option('s
     var input = await me.GetInputAsync(year, day);
     await Shell.Git.Add($"D{day:00}/");
     await Shell.Git.Commit($"D{day:00}");
-    await Shell.VsCode.OpenInExistingWindow($"D{day:00}/Solution.cs", $"D{day:00}/input.json");
+    await Shell.VsCode.OpenInExistingWindow($"D{day:00}/Solution.cs", $"D{day:00}/input.json", $"D{day:00}/test1.json");
 });
 
 app.AddCommand("test", ([Argument] int year, [Argument] int day, [Argument] int? part, [Option('f')]string file) =>
