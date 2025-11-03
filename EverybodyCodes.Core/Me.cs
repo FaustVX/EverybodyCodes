@@ -101,7 +101,9 @@ public sealed record Me(string Name, int Seed, ImmutableDictionary<int, object?>
                 return;
             File.WriteAllText(path, $$"""
 using ZLinq;
+using CommunityToolkit.HighPerformance;
 using EverybodyCodes.Core;
+using EverybodyCodes.Core.Extensions;
 
 namespace Y{{year}}.D{{day:00}};
 
