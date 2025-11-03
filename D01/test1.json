@@ -3,6 +3,9 @@
         "input": "*.*.*.*.*\n.*.*.*.*.\n*...*.*.*\n.*.*...*.\n*.*...*..\n.*.*.*.*.\n\nRRRRRR\nRRRRRR\nRRRRRR\nRLLRLR\nRLLRLR",
         "answer": "25"
     },
-    "2": null,
+    "2": {
+        "input": "*.*.*.*.*.*.*.*.*.*.*.*.*\n.*.*.*.*.*.*.*.*.*.*.*.*.\n..*.*.*.*...*.*...*.*.*..\n.*...*.*.*.*.*.*.....*.*.\n*.*...*.*.*.*.*.*...*.*.*\n.*.*.*.*.*.*.*.*.......*.\n*.*.*.*.*.*.*.*.*.*...*..\n.*.*.*.*.*.*.*.*.....*.*.\n*.*...*.*.*.*.*.*.*.*....\n.*.*.*.*.*.*.*.*.*.*.*.*.\n*.*.*.*.*.*.*.*.*.*.*.*.*\n.*.*.*.*.*.*.*.*.*...*.*.\n*.*.*.*.*.*.*.*.*...*.*.*\n.*.*.*.*.*.*.*.*.....*.*.\n*.*.*.*.*.*.*.*...*...*.*\n.*.*.*.*.*.*.*.*.*.*.*.*.\n*.*.*...*.*.*.*.*.*.*.*.*\n.*...*.*.*.*...*.*.*...*.\n*.*.*.*.*.*.*.*.*.*.*.*.*\n.*.*.*.*.*.*.*.*.*.*.*.*.\n\nRRRLLRRRLLRLRRLLLRLR\nRRRRRRRRRRLRRRRRLLRR\nLLLLLLLLRLRRLLRRLRLL\nRRRLLRRRLLRLLRLLLRRL\nRLRLLLRRLRRRLRRLRRRL\nLLLLLLLLRLLRRLLRLLLL\nLRLLRRLRLLLLLLLRLRRL\nLRLLRRLLLRRRRRLRRLRR\nLRLLRRLRLLRLRRLLLRLL\nRLLRRRRLRLRLRLRLLRRL",
+        "answer": "115"
+    },
     "3": null
 }
