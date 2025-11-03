@@ -1,0 +1,127 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": ".NET Core Launch (console)",
+      "type": "coreclr",
+      "request": "launch",
+      "preLaunchTask": "build",
+      "program": "${workspaceFolder}/bin/Debug/net10.0/EverybodyCodes.dll",
+      "args": [],
+      "cwd": "${workspaceFolder}",
+      "stopAtEntry": false,
+      "console": "internalConsole"
+    },
+    {
+      "name": ".NET Core Launch (Year/Day)",
+      "type": "coreclr",
+      "request": "launch",
+      "preLaunchTask": "build",
+      "program": "${workspaceFolder}/bin/Debug/net10.0/EverybodyCodes.dll",
+      "args": [
+        "run",
+        "2",
+        "${input:day}",
+        "${input:part}",
+        "--session",
+        "${input:session}"
+      ],
+      "cwd": "${workspaceFolder}",
+      "console": "integratedTerminal",
+      "stopAtEntry": false,
+      "internalConsoleOptions": "openOnSessionStart",
+      "requireExactSource": false
+    },
+    {
+      "name": ".NET Core Launch Test (Year/Day)",
+      "type": "coreclr",
+      "request": "launch",
+      "preLaunchTask": "build",
+      "program": "${workspaceFolder}/bin/Debug/net10.0/EverybodyCodes.dll",
+      "args": [
+        "test",
+        "2",
+        "${input:day}",
+        "${input:part}",
+        "--file",
+        "${input:file}"
+      ],
+      "cwd": "${workspaceFolder}",
+      "console": "integratedTerminal",
+      "stopAtEntry": false,
+      "internalConsoleOptions": "openOnSessionStart",
+      "requireExactSource": false
+    },
+    {
+      "name": ".NET Core Launch Test All (Year/Day)",
+      "type": "coreclr",
+      "request": "launch",
+      "preLaunchTask": "build",
+      "program": "${workspaceFolder}/bin/Debug/net10.0/EverybodyCodes.dll",
+      "args": [
+        "test",
+        "2",
+        "${input:day}",
+        "--file",
+        "${input:file}"
+      ],
+      "cwd": "${workspaceFolder}",
+      "console": "integratedTerminal",
+      "stopAtEntry": false,
+      "internalConsoleOptions": "openOnSessionStart",
+      "requireExactSource": false
+    }
+  ],
+  "inputs": [
+    {
+      "id": "day",
+      "type": "command",
+      "command": "memento.pickString",
+      "args": {
+        "id": "day",
+        "options": [
+          "01",
+          "02",
+          "03"
+        ],
+        "description": "Current day"
+      }
+    },
+    {
+      "id": "part",
+      "type": "command",
+      "command": "memento.pickString",
+      "args": {
+        "id": "part",
+        "options": [
+          "1",
+          "2",
+          "3"
+        ],
+        "description": "Current part"
+      }
+    },
+    {
+      "id": "session",
+      "type": "command",
+      "command": "memento.promptString",
+      "args": {
+        "id": "session",
+        "description": "Session cookie"
+      }
+    },
+    {
+      "id": "file",
+      "type": "command",
+      "command": "launch-file-picker.pick",
+      "args": {
+        "options": {
+          "title": "Test file path",
+          "filterRegExp": "test.*",
+          "filterExt": ".json",
+          "canChangeFolder": true
+        }
+      }
+    }
+  ]
+}

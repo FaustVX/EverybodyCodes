@@ -1,0 +1,124 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "build",
+      "command": "dotnet",
+      "type": "shell",
+      "args": [
+        "build",
+        "/property:GenerateFullPaths=true",
+        "/consoleloggerparameters:NoSummary",
+        "${workspaceFolder}/EverybodyCodes.csproj"
+      ],
+      "group": {
+        "kind": "build",
+        "isDefault": true
+      },
+      "presentation": {
+        "reveal": "silent",
+        "close": true
+      },
+      "problemMatcher": "$msCompile",
+      "options": {
+        "statusbar": {
+          "running": {
+            "label": "building"
+          }
+        }
+      }
+    },
+    {
+      "label": "get",
+      "type": "process",
+      "command": "dotnet",
+      "args": [
+        "run",
+        "--project",
+        "${workspaceFolder}/EverybodyCodes.csproj",
+        "--",
+        "get",
+        "2",
+        "${input:day}",
+        "--session",
+        "${input:session}"
+      ],
+      "dependsOn": "build",
+      "options": {
+        "cwd": "${workspaceFolder}",
+        "statusbar": {
+          "running": {
+            "label": "getting"
+          }
+        }
+      }
+    },
+    {
+      "label": "run",
+      "type": "process",
+      "command": "dotnet",
+      "args": [
+        "run",
+        "--project",
+        "${workspaceFolder}/EverybodyCodes.csproj",
+        "--configuration",
+        "Release",
+        "--",
+        "run",
+        "2",
+        "${input:day}",
+        "${input:part}",
+        "--session",
+        "${input:session}"
+      ],
+      "dependsOn": "build",
+      "options": {
+        "cwd": "${workspaceFolder}",
+        "statusbar": {
+          "running": {
+            "label": "running"
+          }
+        }
+      }
+    }
+  ],
+  "inputs": [
+    {
+      "id": "day",
+      "type": "command",
+      "command": "memento.pickString",
+      "args": {
+        "id": "day",
+        "options": [
+          "01",
+          "02",
+          "03"
+        ],
+        "description": "Current day"
+      }
+    },
+    {
+      "id": "part",
+      "type": "command",
+      "command": "memento.pickString",
+      "args": {
+        "id": "part",
+        "options": [
+          "1",
+          "2",
+          "3"
+        ],
+        "description": "Current part"
+      }
+    },
+    {
+      "id": "session",
+      "type": "command",
+      "command": "memento.promptString",
+      "args": {
+        "id": "session",
+        "description": "Session cookie"
+      }
+    }
+  ]
+}
