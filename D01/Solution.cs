@@ -1,19 +1,15 @@
-using ZLinq;
-using CommunityToolkit.HighPerformance;
+using System.Diagnostics;
+using System.Numerics;
 using EverybodyCodes.Core;
-using EverybodyCodes.Core.Extensions;
-using System.Linq.Expressions;
 
 namespace Y2025.D01;
 
 using System;
-using System.Diagnostics;
-using System.Numerics;
 
 // https://everybody.codes/event/2025/quests/1
 public sealed class Solution : ISolution
 {
-    public string Solve1(ReadOnlySpan<char> input)
+    static string Solve(ReadOnlySpan<char> input, Func<int, int, Span<Range>, int> left, Func<int, int, Span<Range>, int> right)
     {
         var names = input[..input.IndexOf('\n')];
         var ranges = (stackalloc Range[names.Count(',') + 1]);
@@ -24,52 +20,31 @@ public sealed class Solution : ISolution
             index = instructions[instruction] switch 
             {
                 ['L', .. var dir] when int.TryParse(dir, out var a)
-                    => Math.Max(index - a, 0),
+                    => left(a, index, ranges),
                 ['R', .. var dir] when int.TryParse(dir, out var a)
-                    => Math.Min(index + a, ranges.Length - 1),
+                    => right(a, index, ranges),
                 _ => throw new UnreachableException(),
             };
         return names[ranges[index]].ToString();
     }
+
+    public string Solve1(ReadOnlySpan<char> input)
+    => Solve(input, (l, index, ranges) => Math.Max(index - l, 0), (r, index, ranges) => Math.Min(index + r, ranges.Length - 1));
 
     public string Solve2(ReadOnlySpan<char> input)
-    {
-        var names = input[..input.IndexOf('\n')];
-        var ranges = (stackalloc Range[names.Count(',') + 1]);
-        names.Split(ranges, ',');
-        var index = 0;
-        var instructions = input[(input.IndexOf('\n') + 2)..];
-        foreach (var instruction in instructions.Split(','))
-            index = instructions[instruction] switch 
-            {
-                ['L', .. var dir] when int.TryParse(dir, out var a)
-                    => (index - a).EuclideanModulo(ranges.Length),
-                ['R', .. var dir] when int.TryParse(dir, out var a)
-                    => (index + a).EuclideanModulo(ranges.Length),
-                _ => throw new UnreachableException(),
-            };
-        return names[ranges[index]].ToString();
-    }
+    => Solve(input, (l, index, ranges) => (index - l).EuclideanModulo(ranges.Length), (r, index, ranges) => (index + r).EuclideanModulo(ranges.Length));
 
     public string Solve3(ReadOnlySpan<char> input)
+    => Solve(input, (l, index, ranges) =>
     {
-        var names = input[..input.IndexOf('\n')];
-        var ranges = (stackalloc Range[names.Count(',') + 1]);
-        names.Split(ranges, ',');
-        var instructions = input[(input.IndexOf('\n') + 2)..];
-        foreach (var instruction in instructions.Split(','))
-            switch (instructions[instruction])
-            {
-                case ['L', .. var dir] when int.TryParse(dir, out var a):
-                    ranges[0].SwapWith(ref ranges[(-a).EuclideanModulo(ranges.Length)]);
-                    break;
-                case ['R', .. var dir] when int.TryParse(dir, out var a):
-                    ranges[0].SwapWith(ref ranges[a.EuclideanModulo(ranges.Length)]);
-                    break;
-                default: throw new UnreachableException();
-            };
-        return names[ranges[0]].ToString();
+        ranges[0].SwapWith(ref ranges[(-l).EuclideanModulo(ranges.Length)]);
+        return 0;
     }
+    , (r, index, ranges) =>
+    {
+        ranges[0].SwapWith(ref ranges[r.EuclideanModulo(ranges.Length)]);
+        return 0;
+    });
 }
 
 file static class Ext
