@@ -8,6 +8,7 @@ namespace Y2025.D01;
 
 using System;
 using System.Diagnostics;
+using System.Numerics;
 
 // https://everybody.codes/event/2025/quests/1
 public sealed class Solution : ISolution
@@ -42,9 +43,9 @@ public sealed class Solution : ISolution
             index = instructions[instruction] switch 
             {
                 ['L', .. var dir] when int.TryParse(dir, out var a)
-                    => ((index - a) % ranges.Length + ranges.Length) % ranges.Length,
+                    => (index - a).EuclideanModulo(ranges.Length),
                 ['R', .. var dir] when int.TryParse(dir, out var a)
-                    => (index + a) % ranges.Length,
+                    => (index + a).EuclideanModulo(ranges.Length),
                 _ => throw new UnreachableException(),
             };
         return names[ranges[index]].ToString();
@@ -60,10 +61,10 @@ public sealed class Solution : ISolution
             switch (instructions[instruction])
             {
                 case ['L', .. var dir] when int.TryParse(dir, out var a):
-                    ranges[0].SwapWith(ref ranges[(-a % ranges.Length + ranges.Length) % ranges.Length]);
+                    ranges[0].SwapWith(ref ranges[(-a).EuclideanModulo(ranges.Length)]);
                     break;
                 case ['R', .. var dir] when int.TryParse(dir, out var a):
-                    ranges[0].SwapWith(ref ranges[a % ranges.Length]);
+                    ranges[0].SwapWith(ref ranges[a.EuclideanModulo(ranges.Length)]);
                     break;
                 default: throw new UnreachableException();
             };
@@ -78,5 +79,16 @@ file static class Ext
     {
         public void SwapWith(ref T other)
         => (value, other) = (other, value);
+    }
+
+    extension<T>(T left)
+    where T : IModulusOperators<T, T, T>, IAdditionOperators<T, T, T>, IAdditiveIdentity<T, T>, IComparisonOperators<T, T, bool>
+    {
+        public T EuclideanModulo(T right)
+        {
+            if (left >= T.AdditiveIdentity)
+                return left % right;
+            return (left % right + right) % right;
+        }
     }
 }
