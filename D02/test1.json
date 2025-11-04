@@ -1,7 +1,7 @@
 {
     "1": {
-        "input": "",
-        "answer": ""
+        "input": "A=[25,9]",
+        "answer": "[357,862]"
     },
     "2": null,
     "3": null
