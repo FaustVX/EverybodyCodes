@@ -9,7 +9,7 @@ using System;
 // https://everybody.codes/event/2025/quests/1
 public sealed class Solution : ISolution
 {
-    static string Solve(ReadOnlySpan<char> input, Func<int, int, Span<Range>, int> left, Func<int, int, Span<Range>, int> right)
+    static string Solve(ReadOnlySpan<char> input, Func<int, int, Span<Range>, int> function)
     {
         var names = input[..input.IndexOf('\n')];
         var ranges = (stackalloc Range[names.Count(',') + 1]);
@@ -20,29 +20,24 @@ public sealed class Solution : ISolution
             index = instructions[instruction] switch 
             {
                 ['L', .. var dir] when int.TryParse(dir, out var a)
-                    => left(a, index, ranges),
+                    => function(-a, index, ranges),
                 ['R', .. var dir] when int.TryParse(dir, out var a)
-                    => right(a, index, ranges),
+                    => function(a, index, ranges),
                 _ => throw new UnreachableException(),
             };
         return names[ranges[index]].ToString();
     }
 
     public string Solve1(ReadOnlySpan<char> input)
-    => Solve(input, (l, index, ranges) => Math.Max(index - l, 0), (r, index, ranges) => Math.Min(index + r, ranges.Length - 1));
+    => Solve(input, (a, index, ranges) => Math.Clamp(index + a, 0, ranges.Length - 1));
 
     public string Solve2(ReadOnlySpan<char> input)
-    => Solve(input, (l, index, ranges) => (index - l).EuclideanModulo(ranges.Length), (r, index, ranges) => (index + r).EuclideanModulo(ranges.Length));
+    => Solve(input, (a, index, ranges) => (index + a).EuclideanModulo(ranges.Length));
 
     public string Solve3(ReadOnlySpan<char> input)
-    => Solve(input, (l, index, ranges) =>
+    => Solve(input, (a, _, ranges) =>
     {
-        ranges[0].SwapWith(ref ranges[(-l).EuclideanModulo(ranges.Length)]);
-        return 0;
-    }
-    , (r, index, ranges) =>
-    {
-        ranges[0].SwapWith(ref ranges[r.EuclideanModulo(ranges.Length)]);
+        ranges[0].SwapWith(ref ranges[a.EuclideanModulo(ranges.Length)]);
         return 0;
     });
 }
