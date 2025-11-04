@@ -22,10 +22,10 @@ public sealed class Solution : ISolution
         foreach (var instruction in instructions.Split(','))
             index = instructions[instruction] switch 
             {
-                ['R', .. var dir] when int.TryParse(dir, out var a)
-                    => Math.Min(index + a, ranges.Length - 1),
                 ['L', .. var dir] when int.TryParse(dir, out var a)
                     => Math.Max(index - a, 0),
+                ['R', .. var dir] when int.TryParse(dir, out var a)
+                    => Math.Min(index + a, ranges.Length - 1),
                 _ => throw new UnreachableException(),
             };
         return names[ranges[index]].ToString();
@@ -41,10 +41,10 @@ public sealed class Solution : ISolution
         foreach (var instruction in instructions.Split(','))
             index = instructions[instruction] switch 
             {
-                ['R', .. var dir] when int.TryParse(dir, out var a)
-                    => (index + a) % ranges.Length,
                 ['L', .. var dir] when int.TryParse(dir, out var a)
                     => ((index - a) % ranges.Length + ranges.Length) % ranges.Length,
+                ['R', .. var dir] when int.TryParse(dir, out var a)
+                    => (index + a) % ranges.Length,
                 _ => throw new UnreachableException(),
             };
         return names[ranges[index]].ToString();
@@ -59,11 +59,11 @@ public sealed class Solution : ISolution
         foreach (var instruction in instructions.Split(','))
             switch (instructions[instruction])
             {
-                case ['R', .. var dir] when int.TryParse(dir, out var a):
-                    ranges[0].SwapWith(ref ranges[a % ranges.Length]);
-                    break;
                 case ['L', .. var dir] when int.TryParse(dir, out var a):
                     ranges[0].SwapWith(ref ranges[(-a % ranges.Length + ranges.Length) % ranges.Length]);
+                    break;
+                case ['R', .. var dir] when int.TryParse(dir, out var a):
+                    ranges[0].SwapWith(ref ranges[a % ranges.Length]);
                     break;
                 default: throw new UnreachableException();
             };
