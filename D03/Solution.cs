@@ -1,5 +1,6 @@
 using ZLinq;
 using EverybodyCodes.Core;
+using System.Runtime.InteropServices;
 
 namespace Y2025.D03;
 
@@ -30,20 +31,10 @@ public sealed class Solution : ISolution
 
     public string Solve3(ReadOnlySpan<char> input)
     {
-        var list = new List<int>();
+        var dict = new Dictionary<int, int>();
         foreach (var number in input.Split(','))
-            list.Add(int.Parse(input[number]));
+            CollectionsMarshal.GetValueRefOrAddDefault(dict, int.Parse(input[number]), out _)++;
 
-        return CountSet(list).ToString();
-
-        static int CountSet(List<int> list)
-        {
-            var set0 = list.ToHashSet();
-            foreach (var item in set0)
-                list.Remove(item);
-            if (list.Count != 0)
-                return CountSet(list) + 1;
-            return 1;
-        }
+        return dict.Max(kvp => kvp.Value).ToString();
     }
 }
