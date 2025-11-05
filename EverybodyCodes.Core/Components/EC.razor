@@ -1,0 +1,66 @@
+@using Microsoft.AspNetCore.Components
+@using Microsoft.AspNetCore.Components.Web
+@using RazorConsole.Components
+@using Spectre.Console
+@using System.Reflection
+@using EverybodyCodes.Core
+@using System.Threading.Tasks
+
+<Figlet Content="Everybody Codes" Color="Spectre.Console.Color.CornflowerBlue" />
+
+<Columns>
+    <TextButton Content="Run"
+                OnClick="Run"
+                BackgroundColor="@Spectre.Console.Color.Grey"
+                FocusedColor="@Spectre.Console.Color.Blue" />
+    <TextButton Content="Test part"
+                OnClick="TestPart"
+                BackgroundColor="@Spectre.Console.Color.Grey"
+                FocusedColor="@Spectre.Console.Color.Blue" />
+    <TextButton Content="Test"
+                OnClick="Test"
+                BackgroundColor="@Spectre.Console.Color.Grey"
+                FocusedColor="@Spectre.Console.Color.Blue" />
+    <p>Selected</p>
+    <Markup Content="@_selected" Foreground="@Spectre.Console.Color.Green" />
+</Columns>
+
+<Panel Title="Preview" Border="BoxBorder.Rounded" Expand="true">
+    <Select Options="@_options"
+            Value="@_selected"
+            OnSelected="@OnSelected"
+            Placeholder="Choose a component"
+            Expand="true" />
+</Panel>
+
+@code {
+    public EC(Session session)
+    => Session = session;
+
+    private static readonly string[] _options = Assembly.GetEntryAssembly()!
+    .GetTypes()
+    .Where(t => t.IsClass)
+    .Where(t => t.IsAssignableTo(typeof(ISolution)))
+    .Select(t => t.Namespace!)
+    .Order()
+    .ToArray();
+    private string _selected = _options.LastOrDefault() ?? "";
+
+    public Session Session { get; }
+
+    private async Task Run()
+    {
+        await Program.Run(1, 1, 1, Session.ID);
+    }
+    private void TestPart()
+    {
+        
+    }
+    private void Test()
+    {
+        
+    }
+
+    private void OnSelected(string value)
+    => _selected = value;
+}

@@ -2,146 +2,176 @@
 using Cocona;
 using EverybodyCodes.Core;
 using EverybodyCodes.Core.Attributes;
+using EverybodyCodes.Core.Components;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
 using Newtonsoft.Json.Linq;
+using RazorConsole.Core;
 
-var app = CoconaLiteApp.Create(args);
-
-app.AddCommand("run", async ([Argument] int year, [Argument] int day, [Argument] int part, [Option('s')] string session) =>
+internal class Program
 {
-    var me = await Me.CreateAsync(session);
-    var input = await me.GetInputAsync(year, day, part);
-    var type = Assembly.GetEntryAssembly()!.GetType($"Y{year}.D{day:00}.Solution");
-    var solution = (ISolution)Activator.CreateInstance(type!)!;
-    var addFinalLF = type!.GetMethod($"Solve{part}")!.CustomAttributes.Any(a => a.AttributeType == typeof(AddFinalLineFeedAttribute));
-    var input1 = addFinalLF ? input.Input + "\n" : input.Input;
-    var startTime = TimeProvider.System.GetTimestamp();
-    var output = solution.Solve(part, input1);
-    Console.WriteLine(TimeProvider.System.GetElapsedTime(startTime));
-    if (input.Answers.Length > part - 1)
-        Console.WriteLine($"Y{year}D{day:00}P{part} : {output} ({input.Answers[part - 1]})");
-    else
-        Console.WriteLine($"Y{year}D{day:00}P{part} : {output}");
-    var response = await input.AnswerAsync(output);
-    Console.WriteLine(response);
-    if (response.IsCorrect && response.Time != default)
+    private static void Main(string[] args)
     {
-        await Shell.Git.Add($"D{day:00}/");
-        await Shell.Git.Commit($"D{day:00}/{part}");
+        var app = CoconaLiteApp.Create(args);
+
+        app.AddCommand(Gui);
+        app.AddCommand("run", Run);
+        app.AddCommand("get", Get);
+        app.AddCommand("test", Test);
+        app.AddCommand("new", New);
+
+        app.Run();
     }
-    return response switch
+
+    public static async Task Gui([Option('s')] string session)
     {
-        { IsCorrect: true } => 0,
-        { IsLengthCorrect: true, IsFirstCorrect: true } => 1,
-        { IsFirstCorrect: true } => 2,
-        { IsLengthCorrect: true } => 3,
-        _ => -1,
-    };
-});
+        var hostBuilder = Host.CreateDefaultBuilder()
+            .ConfigureServices(services =>
+            {
+                services.AddSingleton<Session>(_ => new(session));
+            })
+            .UseRazorConsole<EC>();
+        var host = hostBuilder.Build();
+        await host.RunAsync();
+    }
 
-app.AddCommand("get", async ([Argument] int year, [Argument] int day, [Option('s')] string session) =>
-{
-    var me = await Me.CreateAsync(session);
-    var input = await me.GetInputAsync(year, day);
-    await Shell.Git.Add($"D{day:00}/");
-    await Shell.Git.Commit($"D{day:00}");
-    await Shell.VsCode.OpenInExistingWindow($"D{day:00}/Solution.cs", $"D{day:00}/input.json", $"D{day:00}/test1.json");
-});
-
-app.AddCommand("test", ([Argument] int year, [Argument] int day, [Argument] int? part, [Option('f')]string file) =>
-{
-    Console.WriteLine("Test file: " + Path.GetRelativePath(Path.GetFullPath($"D{day:00}"), file));
-    if (part is int p)
+    public static async Task<int> Run([Argument] int year, [Argument] int day, [Argument] int part, [Option('s')] string session)
     {
-        if (Me.GetTestInput(year, day, p, file) is not {} input)
-        {
-            Console.WriteLine($"The part {p} in test file is null");
-            return;
-        }
-
+        var me = await Me.CreateAsync(session);
+        var input = await me.GetInputAsync(year, day, part);
         var type = Assembly.GetEntryAssembly()!.GetType($"Y{year}.D{day:00}.Solution");
         var solution = (ISolution)Activator.CreateInstance(type!)!;
-        var addFinalLF = type!.GetMethod($"Solve{p}")!.CustomAttributes.Any(a => a.AttributeType == typeof(AddFinalLineFeedAttribute));
-        var input1 = addFinalLF ? input!.Input + "\n" : input!.Input;
+        var addFinalLF = type!.GetMethod($"Solve{part}")!.CustomAttributes.Any(a => a.AttributeType == typeof(AddFinalLineFeedAttribute));
+        var input1 = addFinalLF ? input.Input + "\n" : input.Input;
         var startTime = TimeProvider.System.GetTimestamp();
-        var output = solution.Solve(p, input1);
+        var output = solution.Solve(part, input1);
         Console.WriteLine(TimeProvider.System.GetElapsedTime(startTime));
-        Console.WriteLine($"Y{year}D{day:00}P{p} : {output} ({input.Answers[p - 1]})");
-    }
-    else
-    {
-        var input = Me.GetTestInput(year, day, file);
-        var type = Assembly.GetEntryAssembly()!.GetType($"Y{year}.D{day:00}.Solution");
-        var solution = (ISolution)Activator.CreateInstance(type!)!;
-        for (var i = 0; i < input.Length; i++)
+        if (input.Answers.Length > part - 1)
+            Console.WriteLine($"Y{year}D{day:00}P{part} : {output} ({input.Answers[part - 1]})");
+        else
+            Console.WriteLine($"Y{year}D{day:00}P{part} : {output}");
+        var response = await input.AnswerAsync(output);
+        Console.WriteLine(response);
+        if (response.IsCorrect && response.Time != default)
         {
-            if (input[i] is not {} a)
-                continue;
-            var addFinalLF = type!.GetMethod($"Solve{i + 1}")!.CustomAttributes.Any(a => a.AttributeType == typeof(AddFinalLineFeedAttribute));
-            var input1 = addFinalLF ? a.Input + "\n" : a.Input;
+            await Shell.Git.Add($"D{day:00}/");
+            await Shell.Git.Commit($"D{day:00}/{part}");
+        }
+        return response switch
+        {
+            { IsCorrect: true } => 0,
+            { IsLengthCorrect: true, IsFirstCorrect: true } => 1,
+            { IsFirstCorrect: true } => 2,
+            { IsLengthCorrect: true } => 3,
+            _ => -1,
+        };
+    }
+
+    public static async Task Get([Argument] int year, [Argument] int day, [Option('s')] string session)
+    {
+        var me = await Me.CreateAsync(session);
+        var input = await me.GetInputAsync(year, day);
+        await Shell.Git.Add($"D{day:00}/");
+        await Shell.Git.Commit($"D{day:00}");
+        await Shell.VsCode.OpenInExistingWindow($"D{day:00}/Solution.cs", $"D{day:00}/input.json", $"D{day:00}/test1.json");
+    }
+
+    public static void Test([Argument] int year, [Argument] int day, [Argument] int? part, [Option('f')] string file)
+    {
+        Console.WriteLine("Test file: " + Path.GetRelativePath(Path.GetFullPath($"D{day:00}"), file));
+        if (part is int p)
+        {
+            if (Me.GetTestInput(year, day, p, file) is not { } input)
+            {
+                Console.WriteLine($"The part {p} in test file is null");
+                return;
+            }
+
+            var type = Assembly.GetEntryAssembly()!.GetType($"Y{year}.D{day:00}.Solution");
+            var solution = (ISolution)Activator.CreateInstance(type!)!;
+            var addFinalLF = type!.GetMethod($"Solve{p}")!.CustomAttributes.Any(a => a.AttributeType == typeof(AddFinalLineFeedAttribute));
+            var input1 = addFinalLF ? input!.Input + "\n" : input!.Input;
             var startTime = TimeProvider.System.GetTimestamp();
-            var output = solution.Solve(i + 1, input1);
+            var output = solution.Solve(p, input1);
             Console.WriteLine(TimeProvider.System.GetElapsedTime(startTime));
-            Console.WriteLine($"Y{year}D{day:00}P{i + 1} : {output} ({a.Answers[i]})");
+            Console.WriteLine($"Y{year}D{day:00}P{p} : {output} ({input.Answers[p - 1]})");
+        }
+        else
+        {
+            var input = Me.GetTestInput(year, day, file);
+            var type = Assembly.GetEntryAssembly()!.GetType($"Y{year}.D{day:00}.Solution");
+            var solution = (ISolution)Activator.CreateInstance(type!)!;
+            for (var i = 0; i < input.Length; i++)
+            {
+                if (input[i] is not { } a)
+                    continue;
+                var addFinalLF = type!.GetMethod($"Solve{i + 1}")!.CustomAttributes.Any(a => a.AttributeType == typeof(AddFinalLineFeedAttribute));
+                var input1 = addFinalLF ? a.Input + "\n" : a.Input;
+                var startTime = TimeProvider.System.GetTimestamp();
+                var output = solution.Solve(i + 1, input1);
+                Console.WriteLine(TimeProvider.System.GetElapsedTime(startTime));
+                Console.WriteLine($"Y{year}D{day:00}P{i + 1} : {output} ({a.Answers[i]})");
+            }
         }
     }
-});
 
-app.AddCommand("new", async ([Argument] int year, [Option('r')] string repo = "git@github.com:FaustVX/EverybodyCodes.git", [Option('b')] string branch = "main") =>
-{
+    public static async Task New([Argument] int year, [Option('r')] string repo = "git@github.com:FaustVX/EverybodyCodes.git", [Option('b')] string branch = "main")
+    {
 #pragma warning disable CS9193 // Argument should be a variable because it is passed to a 'ref readonly' parameter
-    var worktree = Path.Combine(["..", ..!Directory.Exists("lib") ? new ReadOnlySpan<string>("..") : [], year.ToString()]);
+        var worktree = Path.Combine(["..", .. !Directory.Exists("lib") ? new ReadOnlySpan<string>("..") : [], year.ToString()]);
 #pragma warning restore CS9193 // Argument should be a variable because it is passed to a 'ref readonly' parameter
-    await Shell.Git.Worktree.Add($"years/{year}", worktree, isOrphan: true);
-    Environment.CurrentDirectory = worktree;
-    var vscode = Directory.CreateDirectory(".vscode");
-    await Shell.Git.Submodule.Add(repo, "lib", branch);
-    var csproj = new FileInfo(Path.Combine("lib", "EverybodyCodes.Core", "EverybodyCodes.Core.csproj"));
-    var launch = new FileInfo(Path.Combine("lib", ".vscode", "launch.json"));
-    var tasks = new FileInfo(Path.Combine("lib", ".vscode", "tasks.json"));
-    var extensions = new FileInfo(Path.Combine("lib", ".vscode", "extensions.json"));
-    var settings = new FileInfo(Path.Combine("lib", ".vscode", "settings.json"));
+        await Shell.Git.Worktree.Add($"years/{year}", worktree, isOrphan: true);
+        Environment.CurrentDirectory = worktree;
+        var vscode = Directory.CreateDirectory(".vscode");
+        await Shell.Git.Submodule.Add(repo, "lib", branch);
+        var csproj = new FileInfo(Path.Combine("lib", "EverybodyCodes.Core", "EverybodyCodes.Core.csproj"));
+        var launch = new FileInfo(Path.Combine("lib", ".vscode", "launch.json"));
+        var tasks = new FileInfo(Path.Combine("lib", ".vscode", "tasks.json"));
+        var extensions = new FileInfo(Path.Combine("lib", ".vscode", "extensions.json"));
+        var settings = new FileInfo(Path.Combine("lib", ".vscode", "settings.json"));
 
-    var text = csproj.ReadToEnd().Replace("'false'", "'true'");
-    File.WriteAllText("EverybodyCodes.csproj", text);
-    await Shell.Dotnet.New("gitignore");
-    await Shell.Dotnet.New("sln");
-    await Shell.Dotnet.Sln.Add("EverybodyCodes.csproj");
+        var text = csproj.ReadToEnd().Replace("'false'", "'true'");
+        File.WriteAllText("EverybodyCodes.csproj", text);
+        await Shell.Dotnet.New("gitignore");
+        await Shell.Dotnet.New("sln");
+        await Shell.Dotnet.Sln.Add("EverybodyCodes.csproj");
 
-    text = launch.ReadToEnd()
-        .Replace("/EverybodyCodes.Core.dll", "/EverybodyCodes.dll")
-        .Replace("/EverybodyCodes.Core", "")
-        .Replace("${input:year}", year.ToString());
-    var json = JObject.Parse(text);
-    if (year < 2000) // Stories
-    {
-        var days = (JArray)json["inputs"]![1]!["args"]!["options"]!;
-        for (var i = days.Count - 1; i >= 3; i--)
-            days[i].Remove();
+        text = launch.ReadToEnd()
+            .Replace("/EverybodyCodes.Core.dll", "/EverybodyCodes.dll")
+            .Replace("/EverybodyCodes.Core", "")
+            .Replace("${input:year}", year.ToString());
+        var json = JObject.Parse(text);
+        if (year < 2000) // Stories
+        {
+            var days = (JArray)json["inputs"]![1]!["args"]!["options"]!;
+            for (var i = days.Count - 1; i >= 3; i--)
+                days[i].Remove();
+        }
+        ((JArray)json["inputs"]!)[0].Remove();
+        File.WriteAllText(Path.Combine(vscode.FullName, launch.Name), json.ToString());
+
+        text = tasks.ReadToEnd()
+            .Replace("/EverybodyCodes.Core", "/EverybodyCodes.csproj")
+            .Replace("${input:year}", year.ToString());
+        json = JObject.Parse(text);
+        if (year < 2000) // Stories
+        {
+            var days = (JArray)json["inputs"]![1]!["args"]!["options"]!;
+            for (var i = days.Count - 1; i >= 3; i--)
+                days[i].Remove();
+        }
+        ((JArray)json["inputs"]!)[0].Remove();
+        File.WriteAllText(Path.Combine(vscode.FullName, tasks.Name), json.ToString());
+        File.WriteAllText(Path.Combine(vscode.FullName, extensions.Name), extensions.ReadToEnd());
+        File.WriteAllText(Path.Combine(vscode.FullName, settings.Name), settings.ReadToEnd());
+
+        await Shell.Git.Add(".");
+        await Shell.Git.Commit(year.ToString());
+        await Shell.VsCode.OpenInNewWindow("./");
     }
-    ((JArray)json["inputs"]!)[0].Remove();
-    File.WriteAllText(Path.Combine(vscode.FullName, launch.Name), json.ToString());
+}
 
-    text = tasks.ReadToEnd()
-        .Replace("/EverybodyCodes.Core", "/EverybodyCodes.csproj")
-        .Replace("${input:year}", year.ToString());
-    json = JObject.Parse(text);
-    if (year < 2000) // Stories
-    {
-        var days = (JArray)json["inputs"]![1]!["args"]!["options"]!;
-        for (var i = days.Count - 1; i >= 3; i--)
-            days[i].Remove();
-    }
-    ((JArray)json["inputs"]!)[0].Remove();
-    File.WriteAllText(Path.Combine(vscode.FullName, tasks.Name), json.ToString());
-    File.WriteAllText(Path.Combine(vscode.FullName, extensions.Name), extensions.ReadToEnd());
-    File.WriteAllText(Path.Combine(vscode.FullName, settings.Name), settings.ReadToEnd());
-
-    await Shell.Git.Add(".");
-    await Shell.Git.Commit(year.ToString());
-    await Shell.VsCode.OpenInNewWindow("./");
-});
-
-app.Run();
+public sealed record class Session(string ID);
 
 file static class Ext
 {
