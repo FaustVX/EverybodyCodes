@@ -10,7 +10,10 @@ public sealed class Solution : ISolution
 {
     public string Solve1(ReadOnlySpan<char> input)
     {
-        throw new NotImplementedException();
+        var set = new HashSet<int>();
+        foreach (var number in input.Split(','))
+            set.Add(int.Parse(input[number]));
+        return set.Sum().ToString();
     }
 
     public string Solve2(ReadOnlySpan<char> input)
