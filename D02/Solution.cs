@@ -60,7 +60,34 @@ public sealed class Solution : ISolution
 
     public string Solve3(ReadOnlySpan<char> input)
     {
-        throw new NotImplementedException();
+        var ranges = (stackalloc Range[4]);
+        input.SplitAny(ranges, ['=', '[', ',', ']'], StringSplitOptions.RemoveEmptyEntries);
+
+        var a = new Complex(int.Parse(input[ranges[1]]), int.Parse(input[ranges[2]]));
+        var count = 0;
+
+        for (var y = 0; y < 1001; y++)
+            for (var x = 0; x < 1001; x++)
+            {
+                var isValid = true;
+                var p = a + new Complex(x, y);
+                var result = p;
+                for (var i = 1; i < 100; i++)
+                {
+                    result *= result;
+                    result /= new Complex(100000, 100000);
+                    result += p;
+                    if (Math.Abs(result.Real) > 1000000 || Math.Abs(result.Imaginary) > 1000000)
+                    {
+                        isValid = false;
+                        break;
+                    }
+                }
+                if (isValid)
+                    count++;
+            }
+
+        return count.ToString();
     }
 }
 
