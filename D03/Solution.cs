@@ -32,6 +32,20 @@ public sealed class Solution : ISolution
 
     public string Solve3(ReadOnlySpan<char> input)
     {
-        throw new NotImplementedException();
+        var list = new List<int>();
+        foreach (var number in input.Split(','))
+            list.Add(int.Parse(input[number]));
+
+        return CountSet(list).ToString();
+
+        static int CountSet(List<int> list)
+        {
+            var set0 = list.ToHashSet();
+            foreach (var item in set0)
+                list.Remove(item);
+            if (list.Count != 0)
+                return CountSet(list) + 1;
+            return 1;
+        }
     }
 }
