@@ -3,6 +3,9 @@
         "input": "GRBGGGBBBRRRRRRRR",
         "answer": "7"
     },
-    "2": null,
+    "2": {
+        "input": "GGBR",
+        "answer": "14"
+    },
     "3": null
 }
