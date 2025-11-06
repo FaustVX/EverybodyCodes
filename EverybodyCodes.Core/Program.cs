@@ -8,6 +8,7 @@ var app = CoconaLiteApp.Create(args);
 
 app.AddCommand("run", async ([Argument] int year, [Argument] int day, [Argument] int part, [Option('s')] string session) =>
 {
+    Globals.IsTest = false;
     var me = await Me.CreateAsync(session);
     var input = await me.GetInputAsync(year, day, part);
     var type = Assembly.GetEntryAssembly()!.GetType($"Y{year}.D{day:00}.Solution");
@@ -49,6 +50,7 @@ app.AddCommand("get", async ([Argument] int year, [Argument] int day, [Option('s
 
 app.AddCommand("test", ([Argument] int year, [Argument] int day, [Argument] int? part, [Option('f')]string file) =>
 {
+    Globals.IsTest = true;
     Console.WriteLine("Test file: " + Path.GetRelativePath(Path.GetFullPath($"D{day:00}"), file));
     if (part is int p)
     {
