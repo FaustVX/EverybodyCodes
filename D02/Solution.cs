@@ -1,8 +1,7 @@
-using ZLinq;
-using CommunityToolkit.HighPerformance;
-using EverybodyCodes.Core;
-using EverybodyCodes.Core.Extensions;
 using System.Diagnostics;
+using System.Runtime.CompilerServices;
+using EverybodyCodes.Core;
+using ZLinq;
 
 namespace Y2.D02;
 
@@ -80,29 +79,36 @@ public sealed class Solution : ISolution
 
 file static class Ext
 {
-    public static Queue<TSource> ToQueue<TEnumerator, TSource>(this ValueEnumerable<TEnumerator, TSource> source)
+    extension<TEnumerator, TSource>(ValueEnumerable<TEnumerator, TSource> source)
     where TEnumerator : struct, IValueEnumerator<TSource>, allows ref struct
     {
-        using var val = source.Enumerator;
-        if (val.TryGetSpan(out var span))
+        public Queue<TSource> ToQueue()
         {
-            var hashSet = new Queue<TSource>(span.Length);
-            var readOnlySpan = span;
-            for (var i = 0; i < readOnlySpan.Length; i++)
+            using var val = source.Enumerator;
+            if (val.TryGetSpan(out var span))
             {
-                TSource item = readOnlySpan[i];
-                hashSet.Enqueue(item);
+                var queue = new Queue<TSource>(span.Length);
+                Q<TSource>.GetSize(queue) = span.Length;
+                span.CopyTo(Q<TSource>.GetArray(queue));
+                return queue;
             }
 
-            return hashSet;
-        }
+            var queue2 = val.TryGetNonEnumeratedCount(out var count) ? new Queue<TSource>(count) : new Queue<TSource>();
+            while (val.TryGetNext(out var current))
+            {
+                queue2.Enqueue(current);
+            }
 
-        var hashSet2 = val.TryGetNonEnumeratedCount(out var count) ? new Queue<TSource>(count) : new Queue<TSource>();
-        while (val.TryGetNext(out var current))
-        {
-            hashSet2.Enqueue(current);
+            return queue2;
         }
+    }
 
-        return hashSet2;
+    static class Q<T>
+    {
+        [UnsafeAccessor(UnsafeAccessorKind.Field, Name = "_array")]
+        public static extern ref readonly T[] GetArray(Queue<T> queue);
+
+        [UnsafeAccessor(UnsafeAccessorKind.Field, Name = "_size")]
+        public static extern ref int GetSize(Queue<T> queue);
     }
 }
