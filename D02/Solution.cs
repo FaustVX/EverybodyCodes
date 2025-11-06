@@ -26,9 +26,14 @@ public sealed class Solution : ISolution
     }
 
     public string Solve2(ReadOnlySpan<char> input)
+    => Solve(input, Globals.IsTest ? 5 : 100).ToString();
+
+    public string Solve3(ReadOnlySpan<char> input)
+    => Solve(input, 100_000).ToString();
+
+    static long Solve(ReadOnlySpan<char> input, int repeat)
     {
-        var repeat = Globals.IsTest ? 5 : 100;
-        var circle = string.Create(input.Length * repeat, input, (b, s) =>
+        input = string.Create(input.Length * repeat, input, (b, s) =>
         {
             while (!b.IsEmpty)
             {
@@ -36,10 +41,10 @@ public sealed class Solution : ISolution
                 b = b[s.Length..];
             }
         });
-        var firsts = circle.AsValueEnumerable()
-            .Take(circle.Length / 2)
+        var firsts = input.AsValueEnumerable()
+            .Take(input.Length / 2)
             .ToQueue();
-        var lasts = circle.AsValueEnumerable()
+        var lasts = input.AsValueEnumerable()
             .Skip(firsts.Count)
             .ToQueue();
 
@@ -65,16 +70,11 @@ public sealed class Solution : ISolution
                 i++;
             }
             if (firsts.Count == 0)
-                return (i + 1).ToString();
+                return i + 1;
         }
 
         static void Transfert<T>(Queue<T> from, Queue<T> to)
         => to.Enqueue(from.Dequeue());
-    }
-
-    public string Solve3(ReadOnlySpan<char> input)
-    {
-        throw new NotImplementedException();
     }
 }
 
