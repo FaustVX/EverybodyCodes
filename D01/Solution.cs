@@ -72,10 +72,10 @@ public sealed class Solution : ISolution
         var section = input.IndexOf("\n\n");
         var grid = input[..(section + 1)].AsSpan2D('\n');
         var tokens = input[(section + 2)..].AsSpan2D('\n');
+
+        var tossCache = TossCacheGenerator(grid, tokens).ToFrozenDictionary();
+
         var length = grid.Width / 2 + 1;
-
-        var tossCache = TossCacheGenerator(grid, tokens, length).ToFrozenDictionary();
-
         var min = int.MaxValue;
         var max = int.MinValue;
 
@@ -124,9 +124,10 @@ public sealed class Solution : ISolution
             return score;
         }
 
-        static IReadOnlyDictionary<(int slot, int path), int> TossCacheGenerator(ReadOnlySpan2D<char> grid, ReadOnlySpan2D<char> tokens, int length)
+        static IReadOnlyDictionary<(int slot, int path), int> TossCacheGenerator(ReadOnlySpan2D<char> grid, ReadOnlySpan2D<char> tokens)
         {
-            var tossCache = new Dictionary<(int slot, int path), int>();
+            var length = grid.Width / 2 + 1;
+            var tossCache = new Dictionary<(int slot, int path), int>(capacity: length * tokens.Height);
             for (var slot = 0; slot < length; slot++)
                 for (var path = 0; path < tokens.Height; path++)
                     tossCache[(slot, path)] = Math.Max(0, Toss(grid, slot, tokens.GetRowSpan(path)) * 2 - (slot + 1));
