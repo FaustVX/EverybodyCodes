@@ -1,7 +1,7 @@
 {
     "1": {
-        "input": "",
-        "answer": ""
+        "input": "128\n64\n32\n16\n8",
+        "answer": "32400"
     },
     "2": null,
     "3": null

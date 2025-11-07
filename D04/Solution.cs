@@ -10,7 +10,9 @@ public sealed class Solution : ISolution
 {
     public string Solve1(ReadOnlySpan<char> input)
     {
-        throw new NotImplementedException();
+        var first = int.Parse(input[..input.IndexOf('\n')]);
+        var last = int.Parse(input[(input.LastIndexOf('\n') + 1)..]);
+        return (first * 2025 / last).ToString();
     }
 
     public string Solve2(ReadOnlySpan<char> input)
