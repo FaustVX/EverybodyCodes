@@ -64,8 +64,8 @@ public sealed record Me(string Name, int Seed, ImmutableDictionary<int, object?>
                 throw new ArgumentOutOfRangeException(nameof(day), "Day must be between 1 and 20.");
 
             var now = TimeProvider.GetUtcNow();
-            // Event opens every year on 3 November at 23:00 UTC
-            var availableFrom = new DateTimeOffset(year, 11, 3, 23, 0, 0, TimeSpan.Zero).AddDays(day - 1) // day 1 -> start, day 2 -> start + 1 day, ...
+            // Event opens every year on 1st monday of November at 23:00 UTC
+            var availableFrom = new DateTimeOffset(year, 11, 1, 23, 0, 0, TimeSpan.Zero).Nth(DayOfWeek.Monday).AddDays(day - 1) // day 1 -> start, day 2 -> start + 1 day, ...
                 .AddDays((day - 1) / 5 * 2); // day 5 -> start + 4 day, day 6 -> start + 6 day, ..., day 20 -> start + 25 day
 
             if (now < availableFrom)
@@ -220,5 +220,23 @@ public sealed class Solution : ISolution
         => Encoding.UTF8.GetBytes(key);
         private static byte[] GetIV(string key)
         => Encoding.UTF8.GetBytes(key[..16]);
+    }
+}
+
+
+file static class Ext
+{
+    extension(DateTimeOffset dto)
+    {
+        public DateTimeOffset Nth(DayOfWeek day, int nth = 1)
+        {
+            var fday = new DateTimeOffset(new(dto.Year, dto.Month, 1), new(dto.Hour, dto.Minute), dto.Offset);
+
+            var fOc = fday.DayOfWeek == day ? fday : fday.AddDays(day - fday.DayOfWeek);
+            // CurDate = 2011.10.1 Occurance = 1, Day = Friday >> 2011.09.30 FIX.
+            if (fOc.Month < dto.Month)
+                nth++;
+            return fOc.AddDays(7 * (nth - 1));
+        }
     }
 }
