@@ -103,9 +103,9 @@ app.AddCommand("test", ([Argument] int year, [Argument] int day, [Argument] int?
     }
 });
 
-app.AddCommand("new", async ([Argument] int year, [Option('r')] string repo = "git@github.com:FaustVX/EverybodyCodes.git", [Option('b')] string branch = "main", [Option('w')] bool withoutWorktree = false) =>
+app.AddCommand("new", async ([Argument] int year, [Option('f')]string? folder, [Option('r')] string repo = "git@github.com:FaustVX/EverybodyCodes.git", [Option('b')] string branch = "main", [Option('w')] bool withoutWorktree = false) =>
 {
-    var worktree = Path.Combine(["..", ..!Directory.Exists("lib") ? [".."] : ReadOnlySpan<string>.Empty, year.ToString()]);
+    var worktree = folder ?? Path.Combine(["..", ..!Directory.Exists("lib") ? [".."] : ReadOnlySpan<string>.Empty, year.ToString()]);
     if (withoutWorktree)
     {
         Directory.CreateDirectory(worktree);
