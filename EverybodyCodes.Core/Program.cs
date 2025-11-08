@@ -171,7 +171,8 @@ app.Run();
 static void PrintResult(int year, int day, int part, string answer, string? expected)
 {
     Console.Write($"Y{year}D{day:00}P{part} : ");
-    Console.ForegroundColor = answer == expected ? ConsoleColor.Green : ConsoleColor.Red;
+    if (expected is not null)
+        Console.ForegroundColor = answer == expected ? ConsoleColor.Green : ConsoleColor.Red;
     Console.Write(answer);
     Console.ResetColor();
     if (expected is not null)
