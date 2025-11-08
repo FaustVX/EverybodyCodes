@@ -24,7 +24,8 @@
 				"statusbar": {
 					"running": {
 						"label": "building"
-					}
+					},
+					"hide": true
 				}
 			}
 		},
