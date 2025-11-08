@@ -69,7 +69,7 @@ public sealed record Me(string Name, int Seed, ImmutableDictionary<int, object?>
                 .AddDays((day - 1) / 5 * 2); // day 5 -> start + 4 day, day 6 -> start + 6 day, ..., day 20 -> start + 25 day
 
             if (now < availableFrom)
-                throw new InvalidOperationException($"Day {day} of {year} is not yet available (available from {availableFrom.LocalDateTime:F}).");
+                throw new InvalidOperationException($"Day {day} of {year} is not yet available (available from {availableFrom.LocalDateTime:F}, in {availableFrom - now}).");
         }
 
         return JsonSerializer.Deserialize<Input>(await GetJsonAsync(this, year, day))!;
