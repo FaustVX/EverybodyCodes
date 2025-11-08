@@ -38,9 +38,9 @@ public sealed record Me(string Name, int Seed, ImmutableDictionary<int, object?>
             ..keys.Answer3 is string a3 ? [a3] : ReadOnlySpan<string>.Empty
             ];
 
-        return [..input[1] is {} i1 ? [new(this, year, day, 1, DecryptStringFromBytes_Aes(input, keys, 1), answers)] : ReadOnlySpan<Part>.Empty,
-        ..input[2] is {} i2 ? [new(this, year, day, 2, DecryptStringFromBytes_Aes(input, keys, 2), answers)] : ReadOnlySpan<Part>.Empty,
-        ..input[3] is {} i3 ? [new(this, year, day, 3, DecryptStringFromBytes_Aes(input, keys, 3), answers)] : ReadOnlySpan<Part>.Empty];
+        return [..keys.Key1 is {} ? [new(this, year, day, 1, DecryptStringFromBytes_Aes(input, keys, 1), answers)] : ReadOnlySpan<Part>.Empty,
+        ..keys.Key2 is {} ? [new(this, year, day, 2, DecryptStringFromBytes_Aes(input, keys, 2), answers)] : ReadOnlySpan<Part>.Empty,
+        ..keys.Key3 is {} ? [new(this, year, day, 3, DecryptStringFromBytes_Aes(input, keys, 3), answers)] : ReadOnlySpan<Part>.Empty];
     }
 
     public static Part? GetTestPart(int year, int day, int part, string file)
