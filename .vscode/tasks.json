@@ -24,7 +24,8 @@
         "statusbar": {
           "running": {
             "label": "building"
-          }
+          },
+          "hide": true
         }
       }
     },
@@ -43,7 +44,6 @@
         "--session",
         "${input:session}"
       ],
-      "dependsOn": "build",
       "options": {
         "cwd": "${workspaceFolder}",
         "statusbar": {
@@ -71,12 +71,37 @@
         "--session",
         "${input:session}"
       ],
-      "dependsOn": "build",
       "options": {
         "cwd": "${workspaceFolder}",
         "statusbar": {
           "running": {
             "label": "running"
+          }
+        }
+      }
+    },
+    {
+      "label": "run all",
+      "type": "process",
+      "command": "dotnet",
+      "args": [
+        "run",
+        "--project",
+        "${workspaceFolder}/EverybodyCodes.csproj",
+        "--configuration",
+        "Release",
+        "--",
+        "run",
+        "2",
+        "${input:day}",
+        "--session",
+        "${input:session}"
+      ],
+      "options": {
+        "cwd": "${workspaceFolder}",
+        "statusbar": {
+          "running": {
+            "label": "running all"
           }
         }
       }
