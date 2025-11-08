@@ -6,37 +6,52 @@ using Newtonsoft.Json.Linq;
 
 var app = CoconaLiteApp.Create(args);
 
-app.AddCommand("run", async ([Argument] int year, [Argument] int day, [Argument] int part, [Option('s')] string session) =>
+app.AddCommand("run", async ([Argument] int year, [Argument] int day, [Argument] int? part, [Option('s')] string session) =>
 {
     Globals.IsTest = false;
     var me = await Me.CreateAsync(session);
-    var input = await me.GetPartAsync(year, day, part);
+    var input = await me.GetPartsAsync(year, day);
     var type = Assembly.GetEntryAssembly()!.GetType($"Y{year}.D{day:00}.Solution");
     var solution = (ISolution)Activator.CreateInstance(type!)!;
-    var addFinalLF = type!.GetMethod($"Solve{part}")!.CustomAttributes.Any(a => a.AttributeType == typeof(AddFinalLineFeedAttribute));
-    var input1 = addFinalLF ? input.Input + "\n" : input.Input;
-    var startTime = TimeProvider.System.GetTimestamp();
-    var output = solution.Solve(part, input1);
-    Console.WriteLine(TimeProvider.System.GetElapsedTime(startTime));
-    if (input.Answers.Length > part - 1)
-        Console.WriteLine($"Y{year}D{day:00}P{part} : {output} ({input.Answers[part - 1]})");
-    else
-        Console.WriteLine($"Y{year}D{day:00}P{part} : {output}");
-    var response = await input.AnswerAsync(output);
-    Console.WriteLine(response);
-    if (response.IsCorrect && response.Time != default)
+    if (part is int p)
     {
-        await Shell.Git.Add($"D{day:00}/");
-        await Shell.Git.Commit($"D{day:00}/{part}");
+        var addFinalLF = type!.GetMethod($"Solve{p}")!.CustomAttributes.Any(a => a.AttributeType == typeof(AddFinalLineFeedAttribute));
+        var input1 = addFinalLF ? input[p - 1].Input + "\n" : input[p - 1].Input;
+        var startTime = TimeProvider.System.GetTimestamp();
+        var output = solution.Solve(p, input1);
+        Console.WriteLine(TimeProvider.System.GetElapsedTime(startTime));
+        if (input[p - 1].Answers.Length > p - 1)
+            Console.WriteLine($"Y{year}D{day:00}P{p} : {output} ({input[p - 1].Answers[p - 1]})");
+        else
+            Console.WriteLine($"Y{year}D{day:00}P{p} : {output}");
+        var response = await input[p - 1].AnswerAsync(output);
+        Console.WriteLine(response);
+        if (response.IsCorrect && response.Time != default)
+        {
+            await Shell.Git.Add($"D{day:00}/");
+            await Shell.Git.Commit($"D{day:00}/{p}");
+        }
     }
-    return response switch
-    {
-        { IsCorrect: true } => 0,
-        { IsLengthCorrect: true, IsFirstCorrect: true } => 1,
-        { IsFirstCorrect: true } => 2,
-        { IsLengthCorrect: true } => 3,
-        _ => -1,
-    };
+    else
+        for (p = 1; p <= input.Length; p++)
+        {
+            var addFinalLF = type!.GetMethod($"Solve{p}")!.CustomAttributes.Any(a => a.AttributeType == typeof(AddFinalLineFeedAttribute));
+            var input1 = addFinalLF ? input[p - 1].Input + "\n" : input[p - 1].Input;
+            var startTime = TimeProvider.System.GetTimestamp();
+            var output = solution.Solve(p, input1);
+            Console.WriteLine(TimeProvider.System.GetElapsedTime(startTime));
+            if (input[p - 1].Answers.Length > p - 1)
+                Console.WriteLine($"Y{year}D{day:00}P{p} : {output} ({input[p - 1].Answers[p - 1]})");
+            else
+                Console.WriteLine($"Y{year}D{day:00}P{p} : {output}");
+            var response = await input[p - 1].AnswerAsync(output);
+            Console.WriteLine(response);
+            if (response.IsCorrect && response.Time != default)
+            {
+                await Shell.Git.Add($"D{day:00}/");
+                await Shell.Git.Commit($"D{day:00}/{p}");
+            }
+        }
 });
 
 app.AddCommand("get", async ([Argument] int year, [Argument] int day, [Option('s')] string session) =>

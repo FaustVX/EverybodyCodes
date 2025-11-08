@@ -25,18 +25,22 @@ public sealed record Me(string Name, int Seed, ImmutableDictionary<int, object?>
         return (await client.GetFromJsonAsync<Me>("/api/user/me"))! with { Cookies = cookieContainer };
     }
 
-    public async Task<Part> GetPartAsync(int year, int day, int part)
+    public async Task<Part[]> GetPartsAsync(int year, int day)
     {
         var input = await GetInputAsync(year, day);
         using var handler = new HttpClientHandler() { CookieContainer = Cookies };
         using var client = new HttpClient(handler) { BaseAddress = BaseAddress };
         var keys = (await client.GetFromJsonAsync<Key>($"/api/event/{year}/quest/{day}"))!;
 
-        return new(this, year, day, part, DecryptStringFromBytes_Aes(input, keys, part), [
-            ..keys.Answer1 is string a1 ? new ReadOnlySpan<string>(ref a1) : [],
-            ..keys.Answer2 is string a2 ? new ReadOnlySpan<string>(ref a2) : [],
-            ..keys.Answer3 is string a3 ? new ReadOnlySpan<string>(ref a3) : []
-            ]);
+        ImmutableArray<string> answers = [
+            ..keys.Answer1 is string a1 ? [a1] : ReadOnlySpan<string>.Empty,
+            ..keys.Answer2 is string a2 ? [a2] : ReadOnlySpan<string>.Empty,
+            ..keys.Answer3 is string a3 ? [a3] : ReadOnlySpan<string>.Empty
+            ];
+
+        return [..input[1] is {} i1 ? [new(this, year, day, 1, DecryptStringFromBytes_Aes(input, keys, 1), answers)] : ReadOnlySpan<Part>.Empty,
+        ..input[2] is {} i2 ? [new(this, year, day, 2, DecryptStringFromBytes_Aes(input, keys, 2), answers)] : ReadOnlySpan<Part>.Empty,
+        ..input[3] is {} i3 ? [new(this, year, day, 3, DecryptStringFromBytes_Aes(input, keys, 3), answers)] : ReadOnlySpan<Part>.Empty];
     }
 
     public static Part? GetTestPart(int year, int day, int part, string file)
