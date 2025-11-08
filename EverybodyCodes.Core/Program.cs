@@ -89,16 +89,16 @@ app.AddCommand("test", ([Argument] int year, [Argument] int day, [Argument] int?
         var input = Me.GetTestParts(year, day, file);
         var type = Assembly.GetEntryAssembly()!.GetType($"Y{year}.D{day:00}.Solution");
         var solution = (ISolution)Activator.CreateInstance(type!)!;
-        for (var i = 0; i < input.Length; i++)
+        for (p = 1; p <= input.Length; p++)
         {
-            if (input[i] is not {} a)
+            if (input[p - 1] is not {} a)
                 continue;
-            var addFinalLF = type!.GetMethod($"Solve{i + 1}")!.CustomAttributes.Any(a => a.AttributeType == typeof(AddFinalLineFeedAttribute));
+            var addFinalLF = type!.GetMethod($"Solve{p}")!.CustomAttributes.Any(a => a.AttributeType == typeof(AddFinalLineFeedAttribute));
             var input1 = addFinalLF ? a.Input + "\n" : a.Input;
             var startTime = TimeProvider.System.GetTimestamp();
-            var output = solution.Solve(i + 1, input1);
+            var output = solution.Solve(p, input1);
             Console.WriteLine(TimeProvider.System.GetElapsedTime(startTime));
-            Console.WriteLine($"Y{year}D{day:00}P{i + 1} : {output} ({a.Answers[i]})");
+            Console.WriteLine($"Y{year}D{day:00}P{p} : {output} ({a.Answers[p - 1]})");
         }
     }
 });
