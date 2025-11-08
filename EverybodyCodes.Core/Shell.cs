@@ -16,6 +16,8 @@ public static class Shell
         => StartAsync("git", ["commit", "-m", message, ..args]);
         public static Task Add(params ReadOnlySpan<string> args)
         => StartAsync("git", ["add", ..args]);
+        public static Task Init(params ReadOnlySpan<string> args)
+        => StartAsync("git", ["init", ..args]);
 
         public static class Submodule
         {

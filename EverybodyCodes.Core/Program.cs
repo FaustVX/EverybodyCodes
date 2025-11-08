@@ -103,13 +103,21 @@ app.AddCommand("test", ([Argument] int year, [Argument] int day, [Argument] int?
     }
 });
 
-app.AddCommand("new", async ([Argument] int year, [Option('r')] string repo = "git@github.com:FaustVX/EverybodyCodes.git", [Option('b')] string branch = "main") =>
+app.AddCommand("new", async ([Argument] int year, [Option('r')] string repo = "git@github.com:FaustVX/EverybodyCodes.git", [Option('b')] string branch = "main", [Option('w')] bool withoutWorktree = false) =>
 {
-#pragma warning disable CS9193 // Argument should be a variable because it is passed to a 'ref readonly' parameter
-    var worktree = Path.Combine(["..", ..!Directory.Exists("lib") ? new ReadOnlySpan<string>("..") : [], year.ToString()]);
-#pragma warning restore CS9193 // Argument should be a variable because it is passed to a 'ref readonly' parameter
-    await Shell.Git.Worktree.Add($"years/{year}", worktree, isOrphan: true);
-    Environment.CurrentDirectory = worktree;
+    var worktree = Path.Combine(["..", ..!Directory.Exists("lib") ? [".."] : ReadOnlySpan<string>.Empty, year.ToString()]);
+    if (withoutWorktree)
+    {
+        Directory.CreateDirectory(worktree);
+        Environment.CurrentDirectory = worktree;
+        await Shell.Git.Init();
+    }
+    else
+    {
+        await Shell.Git.Worktree.Add($"years/{year}", worktree, isOrphan: true);
+        Environment.CurrentDirectory = worktree;
+    }
+
     var vscode = Directory.CreateDirectory(".vscode");
     await Shell.Git.Submodule.Add(repo, "lib", branch);
     var csproj = new FileInfo(Path.Combine("lib", "EverybodyCodes.Core", "EverybodyCodes.Core.csproj"));
