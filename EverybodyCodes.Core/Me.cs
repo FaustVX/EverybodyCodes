@@ -25,7 +25,7 @@ public sealed record Me(string Name, int Seed, ImmutableDictionary<int, object?>
         return (await client.GetFromJsonAsync<Me>("/api/user/me"))! with { Cookies = cookieContainer };
     }
 
-    public async Task<Part> GetInputAsync(int year, int day, int part)
+    public async Task<Part> GetPartAsync(int year, int day, int part)
     {
         var input = await GetInputAsync(year, day);
         using var handler = new HttpClientHandler() { CookieContainer = Cookies };
@@ -39,10 +39,10 @@ public sealed record Me(string Name, int Seed, ImmutableDictionary<int, object?>
             ]);
     }
 
-    public static Part? GetTestInput(int year, int day, int part, string file)
-    => GetTestInput(year, day, file)[part - 1];
+    public static Part? GetTestPart(int year, int day, int part, string file)
+    => GetTestParts(year, day, file)[part - 1];
 
-    public static Part?[] GetTestInput(int year, int day, string file)
+    public static Part?[] GetTestParts(int year, int day, string file)
     {
         var input = JsonSerializer.Deserialize<TestInput>(File.ReadAllText(Path.Combine($"D{day:00}", file)))!;
         ImmutableArray<string> answer = [input[1]?.answer!, input[2]?.answer!, input[3]?.answer!];

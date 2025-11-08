@@ -10,7 +10,7 @@ app.AddCommand("run", async ([Argument] int year, [Argument] int day, [Argument]
 {
     Globals.IsTest = false;
     var me = await Me.CreateAsync(session);
-    var input = await me.GetInputAsync(year, day, part);
+    var input = await me.GetPartAsync(year, day, part);
     var type = Assembly.GetEntryAssembly()!.GetType($"Y{year}.D{day:00}.Solution");
     var solution = (ISolution)Activator.CreateInstance(type!)!;
     var addFinalLF = type!.GetMethod($"Solve{part}")!.CustomAttributes.Any(a => a.AttributeType == typeof(AddFinalLineFeedAttribute));
@@ -54,7 +54,7 @@ app.AddCommand("test", ([Argument] int year, [Argument] int day, [Argument] int?
     Console.WriteLine("Test file: " + Path.GetRelativePath(Path.GetFullPath($"D{day:00}"), file));
     if (part is int p)
     {
-        if (Me.GetTestInput(year, day, p, file) is not {} input)
+        if (Me.GetTestPart(year, day, p, file) is not {} input)
         {
             Console.WriteLine($"The part {p} in test file is null");
             return;
@@ -71,7 +71,7 @@ app.AddCommand("test", ([Argument] int year, [Argument] int day, [Argument] int?
     }
     else
     {
-        var input = Me.GetTestInput(year, day, file);
+        var input = Me.GetTestParts(year, day, file);
         var type = Assembly.GetEntryAssembly()!.GetType($"Y{year}.D{day:00}.Solution");
         var solution = (ISolution)Activator.CreateInstance(type!)!;
         for (var i = 0; i < input.Length; i++)
