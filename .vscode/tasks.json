@@ -43,7 +43,6 @@
 				"--session",
 				"${input:session}"
 			],
-			"dependsOn": "build",
 			"options": {
 				"cwd": "${workspaceFolder}",
 				"statusbar": {
@@ -71,7 +70,6 @@
 				"--session",
 				"${input:session}"
 			],
-			"dependsOn": "build",
 			"options": {
 				"cwd": "${workspaceFolder}",
 				"statusbar": {
@@ -98,7 +96,6 @@
 				"--session",
 				"${input:session}"
 			],
-			"dependsOn": "build",
 			"options": {
 				"cwd": "${workspaceFolder}",
 				"statusbar": {
