@@ -21,9 +21,9 @@ app.AddCommand("run", async ([Argument] int year, [Argument] int day, [Argument]
         var output = solution.Solve(p, input1);
         Console.WriteLine(TimeProvider.System.GetElapsedTime(startTime));
         if (input[p - 1].Answers.Length > p - 1)
-            Console.WriteLine($"Y{year}D{day:00}P{p} : {output} ({input[p - 1].Answers[p - 1]})");
+            PrintResult(year, day, p, output, input[p - 1].Answers[p - 1]);
         else
-            Console.WriteLine($"Y{year}D{day:00}P{p} : {output}");
+            PrintResult(year, day, p, output, null);
         var response = await input[p - 1].AnswerAsync(output);
         Console.WriteLine(response);
         if (response.IsCorrect && response.Time != default)
@@ -41,9 +41,9 @@ app.AddCommand("run", async ([Argument] int year, [Argument] int day, [Argument]
             var output = solution.Solve(p, input1);
             Console.WriteLine(TimeProvider.System.GetElapsedTime(startTime));
             if (input[p - 1].Answers.Length > p - 1)
-                Console.WriteLine($"Y{year}D{day:00}P{p} : {output} ({input[p - 1].Answers[p - 1]})");
+                PrintResult(year, day, p, output, input[p - 1].Answers[p - 1]);
             else
-                Console.WriteLine($"Y{year}D{day:00}P{p} : {output}");
+                PrintResult(year, day, p, output, null);
             var response = await input[p - 1].AnswerAsync(output);
             Console.WriteLine(response);
             if (response.IsCorrect && response.Time != default)
@@ -82,7 +82,7 @@ app.AddCommand("test", ([Argument] int year, [Argument] int day, [Argument] int?
         var startTime = TimeProvider.System.GetTimestamp();
         var output = solution.Solve(p, input1);
         Console.WriteLine(TimeProvider.System.GetElapsedTime(startTime));
-        Console.WriteLine($"Y{year}D{day:00}P{p} : {output} ({input.Answers[p - 1]})");
+        PrintResult(year, day, p, output, input.Answers[p - 1]);
     }
     else
     {
@@ -98,7 +98,7 @@ app.AddCommand("test", ([Argument] int year, [Argument] int day, [Argument] int?
             var startTime = TimeProvider.System.GetTimestamp();
             var output = solution.Solve(p, input1);
             Console.WriteLine(TimeProvider.System.GetElapsedTime(startTime));
-            Console.WriteLine($"Y{year}D{day:00}P{p} : {output} ({a.Answers[p - 1]})");
+            PrintResult(year, day, p, output, a.Answers[p - 1]);
         }
     }
 });
@@ -159,6 +159,18 @@ app.AddCommand("new", async ([Argument] int year, [Option('r')] string repo = "g
 });
 
 app.Run();
+
+static void PrintResult(int year, int day, int part, string answer, string? expected)
+{
+    Console.Write($"Y{year}D{day:00}P{part} : ");
+    Console.ForegroundColor = answer == expected ? ConsoleColor.Green : ConsoleColor.Red;
+    Console.Write(answer);
+    Console.ResetColor();
+    if (expected is not null)
+        Console.WriteLine($" ({expected})");
+    else
+        Console.WriteLine();
+}
 
 file static class Ext
 {
