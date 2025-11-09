@@ -1,4 +1,5 @@
 using System.Collections;
+using System.Numerics;
 using CommunityToolkit.HighPerformance;
 
 namespace EverybodyCodes.Core.Extensions;
@@ -48,6 +49,39 @@ public static partial class Extension
             => ++_i < _span2D.Height;
 
             public readonly void Reset() { }
+        }
+    }
+
+    extension<T>(T n)
+    where T : INumberBase<T>, IComparisonOperators<T, T, bool>
+    {
+        public int GetDecimalLength()
+        {
+            if (T.IsZero(n))
+                return 1;
+            n = T.Abs(n);
+            var ten = T.CreateChecked(10);
+            var length = 0;
+            while (n > T.Zero)
+            {
+                n /= ten;
+                length++;
+            }
+            return length;
+        }
+
+        public T Concat(T other)
+        {
+            if (T.IsZero(n))
+                return other;
+            if (T.IsZero(other))
+                return n;
+            var length = other.GetDecimalLength();
+            var ten = T.CreateChecked(10);
+            var mul = T.One;
+            for (var i = 0; i < length; i++)
+                mul *= ten;
+            return n * mul + other;
         }
     }
 }
