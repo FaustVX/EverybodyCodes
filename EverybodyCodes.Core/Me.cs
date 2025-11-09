@@ -115,16 +115,19 @@ namespace Y{{year}}.D{{day:00}};
 // https://everybody.codes/{{(year < 2000 ? "story" : "event")}}/{{year}}/quests/{{day}}
 public sealed class Solution : ISolution
 {
+    // https://everybody.codes/{{(year < 2000 ? "story" : "event")}}/{{year}}/quests/{{day}}#:~:text=Part%20I
     public string Solve1(ReadOnlySpan<char> input)
     {
         throw new NotImplementedException();
     }
 
+    // https://everybody.codes/{{(year < 2000 ? "story" : "event")}}/{{year}}/quests/{{day}}#:~:text=Part%20II
     public string Solve2(ReadOnlySpan<char> input)
     {
         throw new NotImplementedException();
     }
 
+    // https://everybody.codes/{{(year < 2000 ? "story" : "event")}}/{{year}}/quests/{{day}}#:~:text=Part%20III
     public string Solve3(ReadOnlySpan<char> input)
     {
         throw new NotImplementedException();
