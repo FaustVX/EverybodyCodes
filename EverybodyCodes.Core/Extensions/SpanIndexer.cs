@@ -37,7 +37,6 @@ public readonly ref struct SpanIndexer<T>(ReadOnlySpan<Range> ranges, ReadOnlySp
     }
 }
 
-[DebuggerStepThrough]
 public static partial class Extension
 {
     extension(ReadOnlySpan<Range> span)

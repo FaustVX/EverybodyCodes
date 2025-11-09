@@ -4,7 +4,7 @@ using CommunityToolkit.HighPerformance;
 namespace EverybodyCodes.Core.Extensions;
 
 [System.Diagnostics.DebuggerStepThrough]
-public static class Ext
+public static partial class Extension
 {
     extension<T>(ReadOnlySpan<T> span)
     where T : unmanaged
