@@ -6,6 +6,7 @@ namespace Y2025.D02;
 // https://everybody.codes/event/2025/quests/2
 public sealed class Solution : ISolution
 {
+    // https://everybody.codes/event/2025/quests/2#:~:text=Part%20I
     public string Solve1(ReadOnlySpan<char> input)
     {
         var a = Complex.Parse(input[input.IndexOf('[')..]);
@@ -21,9 +22,11 @@ public sealed class Solution : ISolution
         return value.ToString();
     }
 
+    // https://everybody.codes/event/2025/quests/2#:~:text=Part%20II
     public string Solve2(ReadOnlySpan<char> input)
     => Solve(input, 101).ToString();
 
+    // https://everybody.codes/event/2025/quests/2#:~:text=Part%20III
     public string Solve3(ReadOnlySpan<char> input)
     => Solve(input, 1001).ToString();
 

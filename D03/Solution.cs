@@ -7,6 +7,7 @@ namespace Y2025.D03;
 // https://everybody.codes/event/2025/quests/3
 public sealed class Solution : ISolution
 {
+    // https://everybody.codes/event/2025/quests/3#:~:text=Part%20I
     public string Solve1(ReadOnlySpan<char> input)
     {
         var set = new HashSet<int>();
@@ -17,6 +18,7 @@ public sealed class Solution : ISolution
             .ToString();
     }
 
+    // https://everybody.codes/event/2025/quests/3#:~:text=Part%20II
     public string Solve2(ReadOnlySpan<char> input)
     {
         var set = new HashSet<int>();
@@ -29,6 +31,7 @@ public sealed class Solution : ISolution
             .ToString();
     }
 
+    // https://everybody.codes/event/2025/quests/3#:~:text=Part%20III
     public string Solve3(ReadOnlySpan<char> input)
     {
         var dict = new Dictionary<int, int>();

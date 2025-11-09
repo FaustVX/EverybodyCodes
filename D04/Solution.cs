@@ -9,6 +9,7 @@ namespace Y2025.D04;
 // https://everybody.codes/event/2025/quests/4
 public sealed class Solution : ISolution
 {
+    // https://everybody.codes/event/2025/quests/4#:~:text=Part%20I
     public string Solve1(ReadOnlySpan<char> input)
     {
         var first = int.Parse(input[..input.IndexOf('\n')]);
@@ -16,6 +17,7 @@ public sealed class Solution : ISolution
         return (first * 2025 / last).ToString();
     }
 
+    // https://everybody.codes/event/2025/quests/4#:~:text=Part%20II
     public string Solve2(ReadOnlySpan<char> input)
     {
         var first = decimal.Parse(input[..input.IndexOf('\n')]);
@@ -23,6 +25,7 @@ public sealed class Solution : ISolution
         return Math.Ceiling(1e13m / (first / last)).ToString();
     }
 
+    // https://everybody.codes/event/2025/quests/4#:~:text=Part%20III
     public string Solve3(ReadOnlySpan<char> input)
     {
         var previous = decimal.Parse(input[..input.IndexOf('\n')]);

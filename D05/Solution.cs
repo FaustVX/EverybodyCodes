@@ -11,9 +11,11 @@ using System;
 // https://everybody.codes/event/2025/quests/5
 public sealed class Solution : ISolution
 {
+    // https://everybody.codes/event/2025/quests/5#:~:text=Part%20I
     public string Solve1(ReadOnlySpan<char> input)
     => Segment.Parse(input).Quality.ToString();
 
+    // https://everybody.codes/event/2025/quests/5#:~:text=Part%20II
     public string Solve2(ReadOnlySpan<char> input)
     {
         var (min, max) = (long.MaxValue, long.MinValue);
@@ -28,6 +30,7 @@ public sealed class Solution : ISolution
         return (max - min).ToString();
     }
 
+    // https://everybody.codes/event/2025/quests/5#:~:text=Part%20III
     public string Solve3(ReadOnlySpan<char> input)
     {
         var swords = new List<Segment>(capacity: input.Count('\n') + 1);

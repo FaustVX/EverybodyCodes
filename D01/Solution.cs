@@ -28,12 +28,15 @@ public sealed class Solution : ISolution
         return names[ranges[index]].ToString();
     }
 
+    // https://everybody.codes/event/2025/quests/1#:~:text=Part%20I
     public string Solve1(ReadOnlySpan<char> input)
     => Solve(input, (a, index, ranges) => Math.Clamp(index + a, 0, ranges.Length - 1));
 
+    // https://everybody.codes/event/2025/quests/1#:~:text=Part%20II
     public string Solve2(ReadOnlySpan<char> input)
     => Solve(input, (a, index, ranges) => (index + a).EuclideanModulo(ranges.Length));
 
+    // https://everybody.codes/event/2025/quests/1#:~:text=Part%20III
     public string Solve3(ReadOnlySpan<char> input)
     => Solve(input, (a, _, ranges) =>
     {
