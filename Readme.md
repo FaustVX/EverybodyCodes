@@ -22,9 +22,14 @@ Fetch inputs:
 dotnet run -- get 2025 01 --session <SESSION_COOKIE>
 ```
 
-Run a solution and submit:
+Run a solution part and submit:
 ```sh
 dotnet run -- run 2025 01 1 --session <SESSION_COOKIE>
+```
+
+or run all parts of a solution and submit:
+```sh
+dotnet run -- run 2025 01 --session <SESSION_COOKIE>
 ```
 
 Run tests from a local test file:
@@ -32,7 +37,7 @@ Run tests from a local test file:
 dotnet run -- test 2025 01 1 --file D01/test1.json
 ```
 
-Run the 3 tests from a local test file:
+or run all parts from a local test file:
 ```sh
 dotnet run -- test 2025 01 --file D01/test1.json
 ```
@@ -44,7 +49,7 @@ Implemented in the CLI runner: see [`EverybodyCodes.Core.Program`](EverybodyCode
 Usage:
 ```sh
 cd EverybodyCodes.Core
-dotnet run -- new <year> [-r <git repo> ] [-b <branch>]
+dotnet run -- new <year> [-r|--repo <git repo> ] [-b|--branch <branch>]  [-f|--folder <folder to create the year> ]  [-w|--without-worktree ]
 # examples
 cd EverybodyCodes.Core
 dotnet run -- new 2026
@@ -52,7 +57,7 @@ dotnet run -- new 2026 -r git@github.com:YourUser/EverybodyCodes.git -b main
 ```
 
 What it does
-- Creates a git worktree at ../<year> and makes it an orphan branch (via Shell.Git.Worktree.Add) — see [EverybodyCodes.Core.Shell](EverybodyCodes.Core/Shell.cs).
+- Creates a git worktree (or a folder then git init it) at ../<year> (or <folder>) and makes it an orphan branch (via Shell.Git.Worktree.Add) — see [EverybodyCodes.Core.Shell](EverybodyCodes.Core/Shell.cs).
 - Adds the core repository as a submodule at `lib`.
 - Copies and adapts VS Code launch/tasks configs from `lib/.vscode` to the new worktree (modifies program/project paths and the year input).
 - Creates a per-year solution/project and wires it into a solution file.
@@ -61,7 +66,7 @@ What it does
 Files and behavior referenced:
 - CLI implementation: [EverybodyCodes.Core/Program.cs](EverybodyCodes.Core/Program.cs)
 - Worktree/submodule helpers: [EverybodyCodes.Core/Shell.cs](EverybodyCodes.Core/Shell.cs)
-- Per-day scaffolding (when fetching inputs): [EverybodyCodes.Core.Me.CreateSolutionFile](EverybodyCodes.Core/Me.cs) and [EverybodyCodes.Core.Me.CreateTestFile](EverybodyCodes.Core/Me.cs)
+- Per-day scaffolding (when fetching inputs): [EverybodyCodes.Core.Me](EverybodyCodes.Core/Me.cs)
 
 ## How solutions work (short)
 
