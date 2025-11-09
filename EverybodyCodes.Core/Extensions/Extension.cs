@@ -9,8 +9,13 @@ public static class Ext
     extension<T>(ReadOnlySpan<T> span)
     where T : unmanaged
     {
-        public ReadOnlySpan2D<T> AsSpan2D(T delimitor)
-        => span.AsSpan2D(span.Count(delimitor), System.MemoryExtensions.IndexOf(span, delimitor) + 1)[.., ..^1];
+        public ReadOnlySpan2D<T> AsSpan2D(T delimitor, bool skipLastColumn = true)
+        {
+            var s = span.AsSpan2D(span.Count(delimitor), System.MemoryExtensions.IndexOf(span, delimitor) + 1);
+            if (skipLastColumn)
+                return s[.., ..^1];
+            return s;
+        }
     }
 
     extension<T>(ReadOnlySpan2D<T> span)
