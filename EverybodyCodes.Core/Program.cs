@@ -5,6 +5,7 @@ using Cocona;
 using EverybodyCodes.Core;
 using EverybodyCodes.Core.Attributes;
 using Newtonsoft.Json.Linq;
+using Spectre.Console;
 
 var app = CoconaLiteApp.Create(args);
 
@@ -33,6 +34,8 @@ app.AddCommand("run", async ([Argument] int year, [Argument] int day, [Argument]
             await Shell.Git.Add($"D{day:00}/");
             await Shell.Git.Commit($"D{day:00}/{p}");
         }
+        else if (!response.IsCorrect)
+            await Wait60Seconds();
     }
     else
         for (p = 1; p <= input.Length; p++)
@@ -53,7 +56,26 @@ app.AddCommand("run", async ([Argument] int year, [Argument] int day, [Argument]
                 await Shell.Git.Add($"D{day:00}/");
                 await Shell.Git.Commit($"D{day:00}/{p}");
             }
+            else if (!response.IsCorrect)
+                await Wait60Seconds();
         }
+
+    static Task Wait60Seconds()
+    => AnsiConsole.Progress()
+        .Columns(
+            new TaskDescriptionColumn(),
+            new ProgressBarColumn()
+        )
+        .StartAsync(async ctx =>
+        {
+            var wait = ctx.AddTask("Wait 60 seconds", maxValue: 60);
+            while (!ctx.IsFinished)
+            {
+                await Task.Delay(TimeSpan.FromSeconds(1));
+                wait.Increment(1);
+                wait.Description = $"Wait {(int)(wait.MaxValue - wait.Value)} seconds";
+            }
+        });
 });
 
 app.AddCommand("get", async ([Argument] int year, [Argument] int day, [Option('s')] string session) =>
