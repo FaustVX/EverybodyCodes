@@ -7,5 +7,8 @@
         "input": "ABabACacBCbca",
         "answer": "11"
     },
-    "3": null
+    "3": {
+        "input": "AABCBABCABCabcabcABCCBAACBCa",
+        "answer": "34"
+    }
 }

@@ -2,6 +2,7 @@ using ZLinq;
 // using CommunityToolkit.HighPerformance;
 using EverybodyCodes.Core;
 using EverybodyCodes.Core.Extensions;
+using System.Runtime.CompilerServices;
 
 namespace Y2025.D06;
 
@@ -37,6 +38,38 @@ public sealed class Solution : ISolution
     // https://everybody.codes/event/2025/quests/6#:~:text=Part%20III
     public string Solve3(ReadOnlySpan<char> input)
     {
-        throw new NotImplementedException();
+        input = string.Create(input.Length * (Globals.IsTest ? 1 : 1000), input, (s, i) =>
+        {
+            while (!s.IsEmpty)
+            {
+                i.CopyTo(s);
+                s = s[i.Length..];
+            }
+        });
+        var distance = Globals.IsTest ? 10 : 1000;
+        var total = 0;
+        for (var i = 0; i < input.Length; i++)
+        {
+            if (!char.IsLower(input[i]))
+                continue;
+            var area = input.TrySlice(i - distance, distance * 2 + 1);
+            total += area.Count((char)(input[i] - 32));
+        }
+        return total.ToString();
+    }
+}
+
+file static class Ext
+{
+    extension<T>(ReadOnlySpan<T> span)
+    {
+        public ReadOnlySpan<T> TrySlice(int start, int length)
+        {
+            if (start < 0)
+                (start, length) = (0, length + start);
+            if (length > span[start..].Length)
+                length = span[start..].Length;
+            return span.Slice(start, length);
+        }
     }
 }
