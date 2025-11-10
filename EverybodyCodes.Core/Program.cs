@@ -1,4 +1,6 @@
-﻿using System.Reflection;
+﻿using System.Globalization;
+using System.Numerics;
+using System.Reflection;
 using Cocona;
 using EverybodyCodes.Core;
 using EverybodyCodes.Core.Attributes;
@@ -176,9 +178,27 @@ static void PrintResult(int year, int day, int part, string answer, string? expe
     Console.Write(answer);
     Console.ResetColor();
     if (expected is not null)
-        Console.WriteLine($" ({expected})");
+    {
+        var op = Operator<long>(answer, expected)
+            ?? Operator<decimal>(answer, expected)
+            ?? (answer == expected ? "==" : "!=");
+        Console.WriteLine($" {op} {expected}");
+    }
     else
         Console.WriteLine();
+
+    static string? Operator<T>(string answer, string expected)
+    where T : IParsable<T>, IComparisonOperators<T, T, bool>
+    {
+        if (T.TryParse(answer, CultureInfo.InvariantCulture, out var a) && T.TryParse(expected, CultureInfo.InvariantCulture, out var e))
+            if (a < e)
+                return "<";
+            else if (a > e)
+                return ">";
+            else
+                return "==";
+        return null;
+    }
 }
 
 file static class Ext
