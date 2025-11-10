@@ -24,7 +24,14 @@ public sealed class Solution : ISolution
     // https://everybody.codes/event/2025/quests/6#:~:text=Part%20II
     public string Solve2(ReadOnlySpan<char> input)
     {
-        throw new NotImplementedException();
+        var total = 0;
+        for (var i = 0; i < input.Length; i++)
+        {
+            if (!char.IsLower(input[i]))
+                continue;
+            total += input[..i].Count((char)(input[i] - 32));
+        }
+        return total.ToString();
     }
 
     // https://everybody.codes/event/2025/quests/6#:~:text=Part%20III
