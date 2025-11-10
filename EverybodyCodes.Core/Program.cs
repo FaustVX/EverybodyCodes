@@ -78,14 +78,52 @@ app.AddCommand("run", async ([Argument] int year, [Argument] int day, [Argument]
         });
 });
 
-app.AddCommand("get", async ([Argument] int year, [Argument] int day, [Option('s')] string session) =>
-{
-    var me = await Me.CreateAsync(session);
-    var input = await me.GetInputAsync(year, day);
-    await Shell.Git.Add($"D{day:00}/");
-    await Shell.Git.Commit($"D{day:00}");
-    await Shell.VsCode.OpenInExistingWindow($"D{day:00}/Solution.cs", $"D{day:00}/input.json", $"D{day:00}/test1.json");
-});
+app.AddCommand("get", async ([Argument] int year, [Argument] int day, [Option('s')] string session)
+=> await AnsiConsole.Progress()
+    .Columns(
+        new TaskDescriptionColumn(),
+        new ProgressBarColumn()
+    )
+    .StartAsync(async ctx =>
+    {
+        var getMe = ctx.AddTask("Getting Me", maxValue: 1, autoStart: true);
+        getMe.IsIndeterminate = true;
+        var getInput = ctx.AddTask("Getting input", maxValue: 1, autoStart: false);
+        getInput.IsIndeterminate = true;
+
+        try
+        {
+            var me = await Me.CreateAsync(session);
+            getMe.Value = 1;
+            ctx.Refresh();
+            getInput.StartTask();
+            var input = await me.GetInputAsync(year, day);
+            getInput.Value = 1;
+            ctx.Refresh();
+            var git = ctx.AddTask("Git commit", maxValue: 3, autoStart: false);
+            git.StartTask();
+            await Shell.Git.Add($"D{day:00}/");
+            git.Value = 1;
+            ctx.Refresh();
+            await Shell.Git.Commit($"D{day:00}");
+            git.Value = 2;
+            ctx.Refresh();
+            await Shell.VsCode.OpenInExistingWindow($"D{day:00}/Solution.cs", $"D{day:00}/input.json", $"D{day:00}/test1.json");
+            git.Value = 3;
+            ctx.Refresh();
+        }
+        catch (InvalidOperationException ex)
+        {
+            ctx.Refresh();
+            Console.Write(" ");
+            Console.WriteLine(ex.Message);
+            return;
+        }
+        catch
+        {
+            throw;
+        }
+    }));
 
 app.AddCommand("test", ([Argument] int year, [Argument] int day, [Argument] int? part, [Option('f')]string file) =>
 {
