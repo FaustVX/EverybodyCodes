@@ -1,8 +1,5 @@
 using ZLinq;
-// using CommunityToolkit.HighPerformance;
 using EverybodyCodes.Core;
-using EverybodyCodes.Core.Extensions;
-using System.Runtime.CompilerServices;
 
 namespace Y2025.D06;
 
