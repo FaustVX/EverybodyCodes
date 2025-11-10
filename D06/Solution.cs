@@ -1,5 +1,5 @@
 using ZLinq;
-using CommunityToolkit.HighPerformance;
+// using CommunityToolkit.HighPerformance;
 using EverybodyCodes.Core;
 using EverybodyCodes.Core.Extensions;
 
@@ -11,7 +11,14 @@ public sealed class Solution : ISolution
     // https://everybody.codes/event/2025/quests/6#:~:text=Part%20I
     public string Solve1(ReadOnlySpan<char> input)
     {
-        throw new NotImplementedException();
+        var total = 0;
+        for (var i = 0; i < input.Length; i++)
+        {
+            if (input[i] != 'a')
+                continue;
+            total += input[..i].Count('A');
+        }
+        return total.ToString();
     }
 
     // https://everybody.codes/event/2025/quests/6#:~:text=Part%20II
