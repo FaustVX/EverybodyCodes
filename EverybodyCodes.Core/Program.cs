@@ -17,8 +17,14 @@ app.AddCommand("run", async ([Argument] int year, [Argument] int day, [Argument]
     var type = Assembly.GetEntryAssembly()!.GetType($"Y{year}.D{day:00}.Solution");
     var solution = (ISolution)Activator.CreateInstance(type!)!;
     if (part is int p)
+        await RunPart(year, day, input, type!, solution, p);
+    else
+        for (p = 1; p <= input.Length; p++)
+            await RunPart(year, day, input, type!, solution, p);
+
+    static async Task RunPart(int year, int day, Part[] input, Type type, ISolution solution, int p)
     {
-        var addFinalLF = type!.GetMethod($"Solve{p}")!.CustomAttributes.Any(a => a.AttributeType == typeof(AddFinalLineFeedAttribute));
+        var addFinalLF = type.GetMethod($"Solve{p}")!.CustomAttributes.Any(a => a.AttributeType == typeof(AddFinalLineFeedAttribute));
         var input1 = addFinalLF ? input[p - 1].Input + "\n" : input[p - 1].Input;
         var startTime = TimeProvider.System.GetTimestamp();
         var output = solution.Solve(p, input1);
@@ -35,47 +41,22 @@ app.AddCommand("run", async ([Argument] int year, [Argument] int day, [Argument]
             await Shell.Git.Commit($"D{day:00}/{p}");
         }
         else if (!response.IsCorrect)
-            await Wait60Seconds();
+            await AnsiConsole.Progress()
+                .Columns(
+                    new TaskDescriptionColumn(),
+                    new ProgressBarColumn()
+                )
+                .StartAsync(async ctx =>
+                {
+                    var wait = ctx.AddTask("Wait 60 seconds", maxValue: 60);
+                    while (!ctx.IsFinished)
+                    {
+                        await Task.Delay(TimeSpan.FromSeconds(1));
+                        wait.Increment(1);
+                        wait.Description = $"Wait {(int)(wait.MaxValue - wait.Value)} seconds";
+                    }
+                });
     }
-    else
-        for (p = 1; p <= input.Length; p++)
-        {
-            var addFinalLF = type!.GetMethod($"Solve{p}")!.CustomAttributes.Any(a => a.AttributeType == typeof(AddFinalLineFeedAttribute));
-            var input1 = addFinalLF ? input[p - 1].Input + "\n" : input[p - 1].Input;
-            var startTime = TimeProvider.System.GetTimestamp();
-            var output = solution.Solve(p, input1);
-            Console.WriteLine(TimeProvider.System.GetElapsedTime(startTime));
-            if (input[p - 1].Answers.Length > p - 1)
-                PrintResult(year, day, p, output, input[p - 1].Answers[p - 1]);
-            else
-                PrintResult(year, day, p, output, null);
-            var response = await input[p - 1].AnswerAsync(output);
-            Console.WriteLine(response);
-            if (response.IsCorrect && response.Time != default)
-            {
-                await Shell.Git.Add($"D{day:00}/");
-                await Shell.Git.Commit($"D{day:00}/{p}");
-            }
-            else if (!response.IsCorrect)
-                await Wait60Seconds();
-        }
-
-    static Task Wait60Seconds()
-    => AnsiConsole.Progress()
-        .Columns(
-            new TaskDescriptionColumn(),
-            new ProgressBarColumn()
-        )
-        .StartAsync(async ctx =>
-        {
-            var wait = ctx.AddTask("Wait 60 seconds", maxValue: 60);
-            while (!ctx.IsFinished)
-            {
-                await Task.Delay(TimeSpan.FromSeconds(1));
-                wait.Increment(1);
-                wait.Description = $"Wait {(int)(wait.MaxValue - wait.Value)} seconds";
-            }
-        });
 });
 
 app.AddCommand("get", async ([Argument] int year, [Argument] int day, [Option('s')] string session)
@@ -139,12 +120,7 @@ app.AddCommand("test", ([Argument] int year, [Argument] int day, [Argument] int?
 
         var type = Assembly.GetEntryAssembly()!.GetType($"Y{year}.D{day:00}.Solution");
         var solution = (ISolution)Activator.CreateInstance(type!)!;
-        var addFinalLF = type!.GetMethod($"Solve{p}")!.CustomAttributes.Any(a => a.AttributeType == typeof(AddFinalLineFeedAttribute));
-        var input1 = addFinalLF ? input!.Input + "\n" : input!.Input;
-        var startTime = TimeProvider.System.GetTimestamp();
-        var output = solution.Solve(p, input1);
-        Console.WriteLine(TimeProvider.System.GetElapsedTime(startTime));
-        PrintResult(year, day, p, output, input.Answers[p - 1]);
+        RunPart(year, day, p, type!, solution, input);
     }
     else
     {
@@ -152,16 +128,18 @@ app.AddCommand("test", ([Argument] int year, [Argument] int day, [Argument] int?
         var type = Assembly.GetEntryAssembly()!.GetType($"Y{year}.D{day:00}.Solution");
         var solution = (ISolution)Activator.CreateInstance(type!)!;
         for (p = 1; p <= input.Length; p++)
-        {
-            if (input[p - 1] is not {} a)
-                continue;
-            var addFinalLF = type!.GetMethod($"Solve{p}")!.CustomAttributes.Any(a => a.AttributeType == typeof(AddFinalLineFeedAttribute));
-            var input1 = addFinalLF ? a.Input + "\n" : a.Input;
-            var startTime = TimeProvider.System.GetTimestamp();
-            var output = solution.Solve(p, input1);
-            Console.WriteLine(TimeProvider.System.GetElapsedTime(startTime));
-            PrintResult(year, day, p, output, a.Answers[p - 1]);
-        }
+            if (input[p - 1] is { } a)
+                RunPart(year, day, p, type!, solution, a);
+    }
+
+    static void RunPart(int year, int day, int p, Type type, ISolution solution, Part a)
+    {
+        var addFinalLF = type!.GetMethod($"Solve{p}")!.CustomAttributes.Any(a => a.AttributeType == typeof(AddFinalLineFeedAttribute));
+        var input1 = addFinalLF ? a.Input + "\n" : a.Input;
+        var startTime = TimeProvider.System.GetTimestamp();
+        var output = solution.Solve(p, input1);
+        Console.WriteLine(TimeProvider.System.GetElapsedTime(startTime));
+        PrintResult(year, day, p, output, a.Answers[p - 1]);
     }
 });
 
