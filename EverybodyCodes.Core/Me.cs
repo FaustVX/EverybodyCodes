@@ -86,7 +86,7 @@ public sealed record Me(string Name, int Seed, ImmutableDictionary<int, object?>
             var json = (await clientCdn.GetStringAsync($"/assets/{year}/{day}/input/{me.Seed}.json"))!;
             CreateParentDir(Path.GetDirectoryName(path)!);
             CreateSolutionFile(year, day);
-            CreateTestFile(year, day);
+            CreateTestFile(day);
             File.WriteAllText(path, json);
             return json;
 
@@ -136,7 +136,7 @@ public sealed class Solution : ISolution
 """);
         }
 
-        static void CreateTestFile(int year, int day)
+        static void CreateTestFile(int day)
         {
             var path = Path.Combine($"D{day:00}", "test1.json");
             if (File.Exists(path))
