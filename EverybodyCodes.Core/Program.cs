@@ -114,12 +114,18 @@ app.AddCommand("get", async ([Argument] int year, [Argument] int day, [Option('s
             {
                 case OutOfDateException { DurationRemaining.TotalSeconds: var sec, AvailableFrom: var from }:
                 {
-                    var waitTask = ctx.AddTask("Wait x minutes", maxValue: (int)sec, autoStart: false);
+                    var waitTask = ctx.AddTask("Wait x minutes", maxValue: sec, autoStart: false);
                     getInput.NextTask(ctx, waitTask);
                     while (!ctx.IsFinished)
                     {
-                        waitTask.Value = (TimeProvider.System.GetUtcNow() - from).TotalSeconds;
-                        waitTask.Description = $"Wait {(int)(waitTask.MaxValue - waitTask.Value) / 60} minutes";
+                        var duration = TimeProvider.System.GetUtcNow() - from;
+                        waitTask.Value = duration.TotalSeconds;
+                        waitTask.Description = -duration switch
+                        {
+                            { TotalSeconds: < 100 } => $"Wait {(int)-duration.TotalSeconds} seconds",
+                            { TotalMinutes: < 100 } => $"Wait {(int)-duration.TotalMinutes} minutes",
+                            _ => $"Wait {(int)-duration.TotalHours} hours",
+                        };
                         await Task.Delay(TimeSpan.FromSeconds(.5));
                     }
                     break;
