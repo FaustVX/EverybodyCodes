@@ -25,20 +25,28 @@ app.AddCommand("run", async ([Argument] int year, [Argument] int day, [Argument]
         var instanciateTask = ctx.AddTask("Create Solution", maxValue: 2, autoStart: false);
         instanciateTask.IsIndeterminate = true;
 
-        Globals.IsTest = false;
-        var me = await Me.CreateAsync(session);
-        getMeTask.NextTask(ctx, getInputTask);
-        var input = await me.GetPartsAsync(year, day);
-        getInputTask.NextTask(ctx, instanciateTask);
-        var type = Assembly.GetEntryAssembly()!.GetType($"Y{year}.D{day:00}.Solution");
-        var solution = (ISolution)Activator.CreateInstance(type!)!;
-        if (part is int p)
-            await RunPart(year, day, input, type!, solution, p, ctx, instanciateTask);
-        else
-            for (p = 1; p <= input.Length; p++)
-                await RunPart(year, day, input, type!, solution, p, ctx, instanciateTask);
+        try
+        {
+            Globals.IsTest = false;
+            var me = await Me.CreateAsync(session);
+            getMeTask.NextTask(ctx, getInputTask);
+            var input = await me.GetPartsAsync(year, day);
+            getInputTask.NextTask(ctx, instanciateTask);
+            var type = Assembly.GetEntryAssembly()!.GetType($"Y{year}.D{day:00}.Solution");
+            var solution = (ISolution)Activator.CreateInstance(type!)!;
+            if (part is int p)
+                await RunPart(year, day, input, type!, solution, p, ctx, instanciateTask, session);
+            else
+                for (p = 1; p <= input.Length; p++)
+                    await RunPart(year, day, input, type!, solution, p, ctx, instanciateTask, session);
+        }
+        catch (Exception ex)
+        {
+            AnsiConsole.WriteException(ex);
+            return;
+        }
 
-        static async Task RunPart(int year, int day, Part[] input, Type type, ISolution solution, int p, ProgressContext ctx, ProgressTask instanciateTask)
+        static async Task RunPart(int year, int day, Part[] input, Type type, ISolution solution, int p, ProgressContext ctx, ProgressTask instanciateTask, string session)
         {
             instanciateTask.Next(ctx);
             var addFinalLF = type.GetMethod($"Solve{p}")!.CustomAttributes.Any(a => a.AttributeType == typeof(AddFinalLineFeedAttribute));
