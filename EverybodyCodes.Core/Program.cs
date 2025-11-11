@@ -106,16 +106,26 @@ app.AddCommand("get", async ([Argument] int year, [Argument] int day, [Option('s
             await Shell.VsCode.OpenInExistingWindow($"D{day:00}/Solution.cs", $"D{day:00}/input.json", $"D{day:00}/test1.json");
             git.Next(ctx);
         }
-        catch (InvalidOperationException ex)
+        catch (Exception ex)
         {
             ctx.Refresh();
-            Console.Write(" ");
-            Console.WriteLine(ex.Message);
+            AnsiConsole.WriteException(ex);
+            switch (ex)
+            {
+                case OutOfDateException { DurationRemaining.TotalSeconds: var sec, AvailableFrom: var from }:
+                {
+                    var waitTask = ctx.AddTask("Wait x minutes", maxValue: (int)sec, autoStart: false);
+                    getInput.NextTask(ctx, waitTask);
+                    while (!ctx.IsFinished)
+                    {
+                        waitTask.Value = (TimeProvider.System.GetUtcNow() - from).TotalSeconds;
+                        waitTask.Description = $"Wait {(int)(waitTask.MaxValue - waitTask.Value) / 60} minutes";
+                        await Task.Delay(TimeSpan.FromSeconds(.5));
+                    }
+                    break;
+                }
+            }
             return;
-        }
-        catch
-        {
-            throw;
         }
     }));
 

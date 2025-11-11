@@ -69,7 +69,7 @@ public sealed record Me(string Name, int Seed, ImmutableDictionary<int, object?>
                 .AddDays((day - 1) / 5 * 2); // day 5 -> start + 4 day, day 6 -> start + 6 day, ..., day 20 -> start + 25 day
 
             if (now < availableFrom)
-                throw new InvalidOperationException($"Day {day} of {year} is not yet available (available from {availableFrom.LocalDateTime:F}, in {availableFrom - now}).");
+                throw new OutOfDateException(now, availableFrom, day);
         }
 
         return JsonSerializer.Deserialize<Input>(await GetJsonAsync(this, year, day))!;
@@ -242,4 +242,14 @@ file static class Ext
             return fOc.AddDays(7 * (nth - 1));
         }
     }
+}
+
+[Serializable]
+public sealed class OutOfDateException(DateTimeOffset now, DateTimeOffset availableFrom, int day) : Exception
+{
+    public DateTimeOffset AvailableFrom { get; } = availableFrom;
+    public TimeSpan DurationRemaining { get; } = availableFrom - now;
+    public int Day { get; } = day;
+    public override string Message
+    => $"Day {Day} of {AvailableFrom.Year} is not yet available (available from {AvailableFrom.LocalDateTime:F}, in {DurationRemaining}).";
 }
