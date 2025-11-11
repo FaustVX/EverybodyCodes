@@ -106,38 +106,38 @@ app.AddCommand("get", async ([Argument] int year, [Argument] int day, [Option('s
             var me = await Me.CreateAsync(session);
             getInfoTask.NextTask(ctx, getInputTask);
             var input = await me.GetInputAsync(year, day);
-            var git = ctx.AddTask("Git commit", maxValue: 3, autoStart: false);
-            getInputTask.NextTask(ctx, git);
+            // var getDescriptionTask = ctx.AddTask("Getting description", maxValue: 1, autoStart: false);
+            // getDescriptionTask.IsIndeterminate = true;
+            // getInputTask.NextTask(ctx, getDescriptionTask);
+            // var description = await me.GetDescriptionAsync(year, day);
+            var gitTask = ctx.AddTask("Git commit", maxValue: 3, autoStart: false);
+            getInputTask.NextTask(ctx, gitTask);
             await Shell.Git.Add($"D{day:00}/");
-            git.Next(ctx);
+            gitTask.Next(ctx);
             await Shell.Git.Commit($"D{day:00}");
-            git.Next(ctx);
+            gitTask.Next(ctx);
             await Shell.VsCode.OpenInExistingWindow($"D{day:00}/Solution.cs", $"D{day:00}/input.json", $"D{day:00}/test1.json");
-            git.Next(ctx);
+            gitTask.Next(ctx);
         }
         catch (Exception ex)
         {
             ctx.Refresh();
             AnsiConsole.WriteException(ex);
-            switch (ex)
+            if (ex is OutOfDateException { DurationRemaining.TotalSeconds: var sec, AvailableFrom: var from })
             {
-                case OutOfDateException { DurationRemaining.TotalSeconds: var sec, AvailableFrom: var from }:
+                var waitTask = ctx.AddTask("Wait x minutes", maxValue: sec, autoStart: false);
+                getInputTask.NextTask(ctx, waitTask);
+                while (!ctx.IsFinished)
                 {
-                    var waitTask = ctx.AddTask("Wait x minutes", maxValue: sec, autoStart: false);
-                    getInputTask.NextTask(ctx, waitTask);
-                    while (!ctx.IsFinished)
+                    var duration = from - TimeProvider.System.GetUtcNow();
+                    waitTask.Value = waitTask.MaxValue - duration.TotalSeconds;
+                    waitTask.Description = duration switch
                     {
-                        var duration = TimeProvider.System.GetUtcNow() - from;
-                        waitTask.Value = duration.TotalSeconds;
-                        waitTask.Description = -duration switch
-                        {
-                            { TotalSeconds: < 100 } => $"Wait {(int)-duration.TotalSeconds} seconds",
-                            { TotalMinutes: < 100 } => $"Wait {(int)-duration.TotalMinutes} minutes",
-                            _ => $"Wait {(int)-duration.TotalHours} hours",
-                        };
-                        await Task.Delay(TimeSpan.FromSeconds(.5));
-                    }
-                    break;
+                        { TotalSeconds: < 100 } => $"Wait {(int)duration.TotalSeconds} seconds",
+                        { TotalMinutes: < 100 } => $"Wait {(int)duration.TotalMinutes} minutes",
+                        _ => $"Wait {(int)duration.TotalHours} hours",
+                    };
+                    await Task.Delay(TimeSpan.FromSeconds(.5));
                 }
             }
             return;
