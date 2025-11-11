@@ -56,6 +56,19 @@ public sealed record Me(string Name, int Seed, ImmutableDictionary<int, object?>
         input[3] is {} i3 ? new(null!, year, day, 3, i3.input, answer) : null];
     }
 
+    static async Task<string> GetJsonAsync(Me me, int year, int day, string endpoint, string? filename = null)
+    {
+        var path = Path.Combine($"D{day:00}", filename ??= endpoint);
+        if (File.Exists(path))
+            return File.ReadAllText(path);
+
+        using var handler = new HttpClientHandler() { CookieContainer = me.Cookies };
+        using var clientCdn = new HttpClient(handler) { BaseAddress = BaseAddressCdn };
+
+        var json = (await clientCdn.GetStringAsync($"/assets/{year}/{day}/{endpoint}"))!;
+        return json;
+    }
+
     public async Task<Input> GetInputAsync(int year, int day)
     {
         if (year > 2000) // Only for quests
@@ -72,32 +85,12 @@ public sealed record Me(string Name, int Seed, ImmutableDictionary<int, object?>
                 throw new OutOfDateException(now, availableFrom, day);
         }
 
-        return JsonSerializer.Deserialize<Input>(await GetJsonAsync(this, year, day))!;
-
-        static async Task<string> GetJsonAsync(Me me, int year, int day)
-        {
-            var path = Path.Combine($"D{day:00}", "input.json");
-            if (File.Exists(path))
-                return File.ReadAllText(path);
-
-            using var handler = new HttpClientHandler() { CookieContainer = me.Cookies };
-            using var clientCdn = new HttpClient(handler) { BaseAddress = BaseAddressCdn };
-
-            var json = (await clientCdn.GetStringAsync($"/assets/{year}/{day}/input/{me.Seed}.json"))!;
-            CreateParentDir(Path.GetDirectoryName(path)!);
-            CreateSolutionFile(year, day);
-            CreateTestFile(day);
-            File.WriteAllText(path, json);
-            return json;
-
-            static void CreateParentDir(string dir)
-            {
-                if (string.IsNullOrWhiteSpace(dir) || Directory.Exists(dir))
-                    return;
-                CreateParentDir(Path.GetDirectoryName(dir)!);
-                Directory.CreateDirectory(dir);
-            }
-        }
+        string json = await GetJsonAsync(this, year, day, $"input/{Seed}.json", "input.json");
+        var path = Path.Combine($"D{day:00}", "input.json");
+        File.WriteAllText(path, json);
+        CreateSolutionFile(year, day);
+        CreateTestFile(day);
+        return JsonSerializer.Deserialize<Input>(json)!;
 
         static void CreateSolutionFile(int year, int day)
         {
