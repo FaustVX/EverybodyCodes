@@ -1,7 +1,7 @@
 {
     "1": {
-        "input": "",
-        "answer": ""
+        "input": "Oronris,Urakris,Oroneth,Uraketh\n\nr > a,i,o\ni > p,w\nn > e,r\no > n,m\nk > f,r\na > k\nU > r\ne > t\nO > r\nt > h",
+        "answer": "Oroneth"
     },
     "2": null,
     "3": null
