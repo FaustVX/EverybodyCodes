@@ -87,18 +87,18 @@ app.AddCommand("get", async ([Argument] int year, [Argument] int day, [Option('s
     )
     .StartAsync(async ctx =>
     {
-        var getMe = ctx.AddTask("Getting Infos", maxValue: 1, autoStart: true);
-        getMe.IsIndeterminate = true;
-        var getInput = ctx.AddTask("Getting input", maxValue: 1, autoStart: false);
-        getInput.IsIndeterminate = true;
+        var getInfoTask = ctx.AddTask("Getting Infos", maxValue: 1, autoStart: true);
+        getInfoTask.IsIndeterminate = true;
+        var getInputTask = ctx.AddTask("Getting input", maxValue: 1, autoStart: false);
+        getInputTask.IsIndeterminate = true;
 
         try
         {
             var me = await Me.CreateAsync(session);
-            getMe.NextTask(ctx, getInput);
+            getInfoTask.NextTask(ctx, getInputTask);
             var input = await me.GetInputAsync(year, day);
             var git = ctx.AddTask("Git commit", maxValue: 3, autoStart: false);
-            getInput.NextTask(ctx, git);
+            getInputTask.NextTask(ctx, git);
             await Shell.Git.Add($"D{day:00}/");
             git.Next(ctx);
             await Shell.Git.Commit($"D{day:00}");
@@ -115,7 +115,7 @@ app.AddCommand("get", async ([Argument] int year, [Argument] int day, [Option('s
                 case OutOfDateException { DurationRemaining.TotalSeconds: var sec, AvailableFrom: var from }:
                 {
                     var waitTask = ctx.AddTask("Wait x minutes", maxValue: sec, autoStart: false);
-                    getInput.NextTask(ctx, waitTask);
+                    getInputTask.NextTask(ctx, waitTask);
                     while (!ctx.IsFinished)
                     {
                         var duration = TimeProvider.System.GetUtcNow() - from;
