@@ -38,9 +38,9 @@ public sealed record Me(string Name, int Seed, ImmutableDictionary<int, object?>
             ..keys.Answer3 is string a3 ? [a3] : ReadOnlySpan<string>.Empty
             ];
 
-        return [..keys.Key1 is {} ? [new(this, year, day, 1, DecryptStringFromBytes_Aes(input, keys, 1), answers)] : ReadOnlySpan<Part>.Empty,
-        ..keys.Key2 is {} ? [new(this, year, day, 2, DecryptStringFromBytes_Aes(input, keys, 2), answers)] : ReadOnlySpan<Part>.Empty,
-        ..keys.Key3 is {} ? [new(this, year, day, 3, DecryptStringFromBytes_Aes(input, keys, 3), answers)] : ReadOnlySpan<Part>.Empty];
+        return [..keys.Key1 is {} ? [new(this, year, day, 1, DecryptStringFromBytes_Aes(input[1], keys[1, false], keys[1, true]), answers)] : ReadOnlySpan<Part>.Empty,
+        ..keys.Key2 is {} ? [new(this, year, day, 2, DecryptStringFromBytes_Aes(input[2], keys[2, false], keys[2, true]), answers)] : ReadOnlySpan<Part>.Empty,
+        ..keys.Key3 is {} ? [new(this, year, day, 3, DecryptStringFromBytes_Aes(input[3], keys[3, false], keys[3, true]), answers)] : ReadOnlySpan<Part>.Empty];
     }
 
     public static Part? GetTestPart(int year, int day, int part, string file)
@@ -155,16 +155,16 @@ public sealed class Solution : ISolution
         }
     }
 
-    private static string DecryptStringFromBytes_Aes(Input input, Key key, int part)
+    private static string DecryptStringFromBytes_Aes(byte[] input, byte[] key, byte[] iv)
     {
         // Create an Aes object
         // with the specified key and IV.
         using var aes = Aes.Create();
-        aes.Key = key[part, false];
-        aes.IV = key[part, true];
+        aes.Key = key;
+        aes.IV = iv;
 
         // Create the streams used for decryption.
-        using var msDecrypt = new MemoryStream(input[part]);
+        using var msDecrypt = new MemoryStream(input);
         using var csDecrypt = new CryptoStream(msDecrypt, aes.CreateDecryptor(), CryptoStreamMode.Read);
         using var srDecrypt = new StreamReader(csDecrypt);
 
