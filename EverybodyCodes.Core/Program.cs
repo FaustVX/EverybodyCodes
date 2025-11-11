@@ -9,55 +9,74 @@ using Spectre.Console;
 
 var app = CoconaLiteApp.Create(args);
 
-app.AddCommand("run", async ([Argument] int year, [Argument] int day, [Argument] int? part, [Option('s')] string session) =>
-{
-    Globals.IsTest = false;
-    var me = await Me.CreateAsync(session);
-    var input = await me.GetPartsAsync(year, day);
-    var type = Assembly.GetEntryAssembly()!.GetType($"Y{year}.D{day:00}.Solution");
-    var solution = (ISolution)Activator.CreateInstance(type!)!;
-    if (part is int p)
-        await RunPart(year, day, input, type!, solution, p);
-    else
-        for (p = 1; p <= input.Length; p++)
-            await RunPart(year, day, input, type!, solution, p);
-
-    static async Task RunPart(int year, int day, Part[] input, Type type, ISolution solution, int p)
+app.AddCommand("run", async ([Argument] int year, [Argument] int day, [Argument] int? part, [Option('s')] string session)
+=> await AnsiConsole.Progress()
+    .Columns([
+        new TaskDescriptionColumn(),
+        new ProgressBarColumn(),
+        new ElapsedTimeColumn() { Format = null },
+    ])
+    .StartAsync(async ctx =>
     {
-        var addFinalLF = type.GetMethod($"Solve{p}")!.CustomAttributes.Any(a => a.AttributeType == typeof(AddFinalLineFeedAttribute));
-        var input1 = addFinalLF ? input[p - 1].Input + "\n" : input[p - 1].Input;
-        var startTime = TimeProvider.System.GetTimestamp();
-        var output = solution.Solve(p, input1);
-        Console.WriteLine(TimeProvider.System.GetElapsedTime(startTime));
-        if (input[p - 1].Answers.Length > p - 1)
-            PrintResult(year, day, p, output, input[p - 1].Answers[p - 1]);
+        var getMeTask = ctx.AddTask("Getting Me", maxValue: 1, autoStart: true);
+        getMeTask.IsIndeterminate = true;
+        var getInputTask = ctx.AddTask("Getting input", maxValue: 1, autoStart: false);
+        getInputTask.IsIndeterminate = true;
+        var instanciateTask = ctx.AddTask("Create Solution", maxValue: 2, autoStart: false);
+        instanciateTask.IsIndeterminate = true;
+
+        Globals.IsTest = false;
+        var me = await Me.CreateAsync(session);
+        getMeTask.NextTask(ctx, getInputTask);
+        var input = await me.GetPartsAsync(year, day);
+        getInputTask.NextTask(ctx, instanciateTask);
+        var type = Assembly.GetEntryAssembly()!.GetType($"Y{year}.D{day:00}.Solution");
+        var solution = (ISolution)Activator.CreateInstance(type!)!;
+        if (part is int p)
+            await RunPart(year, day, input, type!, solution, p, ctx, instanciateTask);
         else
-            PrintResult(year, day, p, output, null);
-        var response = await input[p - 1].AnswerAsync(output);
-        Console.WriteLine(response);
-        if (response.IsCorrect && response.Time != default)
+            for (p = 1; p <= input.Length; p++)
+                await RunPart(year, day, input, type!, solution, p, ctx, instanciateTask);
+
+        static async Task RunPart(int year, int day, Part[] input, Type type, ISolution solution, int p, ProgressContext ctx, ProgressTask instanciateTask)
         {
-            await Shell.Git.Add($"D{day:00}/");
-            await Shell.Git.Commit($"D{day:00}/{p}");
-        }
-        else if (!response.IsCorrect)
-            await AnsiConsole.Progress()
-                .Columns(
-                    new TaskDescriptionColumn(),
-                    new ProgressBarColumn()
-                )
-                .StartAsync(async ctx =>
+            instanciateTask.Next(ctx);
+            var addFinalLF = type.GetMethod($"Solve{p}")!.CustomAttributes.Any(a => a.AttributeType == typeof(AddFinalLineFeedAttribute));
+            var input1 = addFinalLF ? input[p - 1].Input + "\n" : input[p - 1].Input;
+            var solvingTask = ctx.AddTask("Solving", maxValue: 1, autoStart: false);
+            instanciateTask.NextTask(ctx, solvingTask);
+            var output = solution.Solve(p, input1);
+            var sendingTask = ctx.AddTask("Sending answer", autoStart: false, maxValue: 1);
+            sendingTask.Description = input[p - 1].Answers.Length > p - 1
+                ? PrintResult(year, day, p, output, input[p - 1].Answers[p - 1])
+                : PrintResult(year, day, p, output, null);
+            solvingTask.NextTask(ctx, sendingTask);
+            var response = await input[p - 1].AnswerAsync(output);
+            // Console.WriteLine(response);
+            if (response.IsCorrect && response.Time != default)
+            {
+                var gitTask = ctx.AddTask("Git commit", maxValue: 1, autoStart: false);
+                sendingTask.NextTask(ctx, gitTask);
+                await Shell.Git.Add($"D{day:00}/");
+                await Shell.Git.Commit($"D{day:00}/{p}");
+            }
+            else if (!response.IsCorrect)
+            {
+                var waitTask = ctx.AddTask("Wait 60 seconds", maxValue: 60, autoStart: false);
+                sendingTask.NextTask(ctx, waitTask);
+                while (!ctx.IsFinished)
                 {
-                    var wait = ctx.AddTask("Wait 60 seconds", maxValue: 60);
-                    while (!ctx.IsFinished)
-                    {
-                        await Task.Delay(TimeSpan.FromSeconds(1));
-                        wait.Increment(1);
-                        wait.Description = $"Wait {(int)(wait.MaxValue - wait.Value)} seconds";
-                    }
-                });
-    }
-});
+                    await Task.Delay(TimeSpan.FromSeconds(1));
+                    waitTask.Increment(1);
+                    waitTask.Description = $"Wait {(int)(waitTask.MaxValue - waitTask.Value)} seconds";
+                }
+            }
+            else
+            {
+                sendingTask.Next(ctx);
+            }
+        }
+    }));
 
 app.AddCommand("get", async ([Argument] int year, [Argument] int day, [Option('s')] string session)
 => await AnsiConsole.Progress()
@@ -132,7 +151,7 @@ app.AddCommand("test", ([Argument] int year, [Argument] int day, [Argument] int?
         var startTime = TimeProvider.System.GetTimestamp();
         var output = solution.Solve(p, input1);
         Console.WriteLine(TimeProvider.System.GetElapsedTime(startTime));
-        PrintResult(year, day, p, output, a.Answers[p - 1]);
+        AnsiConsole.MarkupLine(PrintResult(year, day, p, output, a.Answers[p - 1]));
     }
 });
 
@@ -153,13 +172,16 @@ app.AddCommand("new", async ([Argument] int year, [Option('f')]string? folder, [
 
     var vscode = Directory.CreateDirectory(".vscode");
     await Shell.Git.Submodule.Add(repo, "lib", branch);
+    await Shell.Git.Submodule.Update(init: true, recursive: true);
     var csproj = new FileInfo(Path.Combine("lib", "EverybodyCodes.Core", "EverybodyCodes.Core.csproj"));
     var launch = new FileInfo(Path.Combine("lib", ".vscode", "launch.json"));
     var tasks = new FileInfo(Path.Combine("lib", ".vscode", "tasks.json"));
     var extensions = new FileInfo(Path.Combine("lib", ".vscode", "extensions.json"));
     var settings = new FileInfo(Path.Combine("lib", ".vscode", "settings.json"));
 
-    var text = csproj.ReadToEnd().Replace("'false'", "'true'");
+    var text = csproj.ReadToEnd()
+        .Replace("""Include="../spectre""", """Include="lib/spectre""")
+        .Replace("'false'", "'true'");
     File.WriteAllText("EverybodyCodes.csproj", text);
     await Shell.Dotnet.New("gitignore");
     await Shell.Dotnet.New("sln");
@@ -201,22 +223,22 @@ app.AddCommand("new", async ([Argument] int year, [Option('f')]string? folder, [
 
 app.Run();
 
-static void PrintResult(int year, int day, int part, string answer, string? expected)
+static string PrintResult(int year, int day, int part, string answer, string? expected)
 {
-    Console.Write($"Y{year}D{day:00}P{part} : ");
+    var output = $"Y{year}D{day:00}P{part} : ";
     if (expected is not null)
-        Console.ForegroundColor = answer == expected ? ConsoleColor.Green : ConsoleColor.Red;
-    Console.Write(answer);
-    Console.ResetColor();
+        output += answer == expected ? "[green]" : "[red]";
+    output += answer;
+    output += "[/]";
     if (expected is not null)
     {
         var op = Operator<long>(answer, expected)
             ?? Operator<decimal>(answer, expected)
             ?? (answer == expected ? "==" : "!=");
-        Console.WriteLine($" {op} {expected}");
+        output += $" {op} {expected}";
     }
-    else
-        Console.WriteLine();
+
+    return output;
 
     static string? Operator<T>(string answer, string expected)
     where T : IParsable<T>, IComparisonOperators<T, T, bool>
@@ -250,8 +272,8 @@ file static class Ext
             task.Value = task.MaxValue;
             task.StopTask();
             next.IsIndeterminate = false;
-            next.StartTask();
             ctx.Refresh();
+            next.StartTask();
         }
         public void Next(ProgressContext ctx)
         {

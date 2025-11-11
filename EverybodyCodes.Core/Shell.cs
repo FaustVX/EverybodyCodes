@@ -22,7 +22,9 @@ public static class Shell
         public static class Submodule
         {
             public static Task Add(string repo, string folder, string? branch = null, params ReadOnlySpan<string> args)
-            => StartAsync("git", ["submodule", "add", ..branch is not null ? ["-b", branch] : Array.Empty<string>(), "--", repo, folder, ..args]);
+            => StartAsync("git", ["submodule", "add", ..branch is not null ? ["-b", branch] : Array.Empty<string>(), ..args, "--", repo, folder]);
+            public static Task Update(bool init = false, bool recursive = false, params ReadOnlySpan<string> args)
+            => StartAsync("git", ["submodule", "update", ..init ? ["--init"] : Array.Empty<string>(), ..recursive ? ["--recursive"] : Array.Empty<string>(), ..args]);
         }
 
         public static class Worktree
