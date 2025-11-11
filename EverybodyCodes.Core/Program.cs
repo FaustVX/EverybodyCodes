@@ -255,7 +255,8 @@ static string PrintResult(int year, int day, int part, string answer, string? ex
     if (expected is not null)
         output += answer == expected ? "[green]" : "[red]";
     output += answer;
-    output += "[/]";
+    if (expected is not null)
+        output += "[/]";
     if (expected is not null)
     {
         var op = Operator<long>(answer, expected)
