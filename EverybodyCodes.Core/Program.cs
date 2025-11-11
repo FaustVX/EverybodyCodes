@@ -62,19 +62,20 @@ app.AddCommand("run", async ([Argument] int year, [Argument] int day, [Argument]
             }
             else if (!response.IsCorrect)
             {
-                var waitTask = ctx.AddTask("Wait 60 seconds", maxValue: 60, autoStart: false);
+                var me = await Me.CreateAsync(session);
+                var waitTask = ctx.AddTask("Wait 60 seconds", maxValue: me.PenaltySpan.TotalSeconds, autoStart: false);
                 sendingTask.NextTask(ctx, waitTask);
                 while (!ctx.IsFinished)
                 {
-                    await Task.Delay(TimeSpan.FromSeconds(1));
-                    waitTask.Increment(1);
-                    waitTask.Description = $"Wait {(int)(waitTask.MaxValue - waitTask.Value)} seconds";
+                    if (me.PenaltySpan.TotalSeconds >= 10)
+                        await Task.Delay(TimeSpan.FromSeconds(.5));
+                    me = await Me.CreateAsync(session);
+                    waitTask.Value = waitTask.MaxValue - me.PenaltySpan.TotalSeconds;
+                    waitTask.Description = $"Wait {(int)me.PenaltySpan.TotalSeconds} seconds";
                 }
             }
             else
-            {
                 sendingTask.Next(ctx);
-            }
         }
     }));
 

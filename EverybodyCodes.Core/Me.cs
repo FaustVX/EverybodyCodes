@@ -8,13 +8,28 @@ using System.Text.Json.Serialization;
 
 namespace EverybodyCodes.Core;
 
-public sealed record Me(string Name, int Seed, ImmutableDictionary<int, object?> Badges, int Level)
+public sealed record Me(string Name, int Seed, ImmutableDictionary<int, object?> Badges, int Level, [property: JsonConverter(typeof(Me.DateTimeMSConverter))]DateTime ServerTime, [property: JsonConverter(typeof(Me.DateTimeMSConverter))]DateTime PenaltyUntil)
 {
+    private sealed class DateTimeMSConverter : JsonConverter<DateTime>
+    {
+        private readonly static DateOnly OriginalDate = new(1970, 1, 1);
+        private readonly static TimeOnly OriginalTime = new(1, 0, 0);
+        private readonly static DateTime Origin = new(OriginalDate, OriginalTime, DateTimeKind.Utc);
+
+        public override DateTime Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
+        => Origin.AddMilliseconds(reader.GetInt64());
+
+        public override void Write(Utf8JsonWriter writer, DateTime value, JsonSerializerOptions options)
+        => writer.WriteNumberValue((long)(value - Origin).TotalMilliseconds);
+    }
+
     [JsonIgnore]
     public static Uri BaseAddress { get; } = new("https://everybody.codes");
     public static Uri BaseAddressCdn { get; } = new("https://everybody-codes.b-cdn.net/");
     public CookieContainer Cookies { get; init; } = default!;
     public TimeProvider TimeProvider { get; init; } = TimeProvider.System;
+    public TimeSpan PenaltySpan => PenaltyUntil - ServerTime;
+    public TimeSpan PenaltyRemaining => PenaltyUntil - DateTime.UtcNow;
     public static async Task<Me> CreateAsync(string cookie)
     {
         var cookieContainer = new CookieContainer();
