@@ -32,7 +32,26 @@ public sealed class Solution : ISolution
     // https://everybody.codes/event/2025/quests/7#:~:text=Part%20II
     public string Solve2(ReadOnlySpan<char> input)
     {
-        throw new NotImplementedException();
+        var nl = input.IndexOf("\n\n");
+        var names = input[..nl];
+        var rules = CreateRules(input[(nl + 2)..]);
+        var i = 1;
+        var sum = 0;
+        foreach (var nameR in names.Split(','))
+        {
+            var name = names[nameR];
+            var found = true;
+            for (var j = 1; j < name.Length; j++)
+                if (!rules[name[j - 1]].Contains(name[j]))
+                {
+                    found = false;
+                    break;
+                }
+            if (found)
+                sum += i;
+            i++;
+        }
+        return sum.ToString();
     }
 
     // https://everybody.codes/event/2025/quests/7#:~:text=Part%20III
