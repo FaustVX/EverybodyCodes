@@ -82,7 +82,8 @@ app.AddCommand("get", async ([Argument] int year, [Argument] int day, [Option('s
 => await AnsiConsole.Progress()
     .Columns(
         new TaskDescriptionColumn(),
-        new ProgressBarColumn()
+        new ProgressBarColumn(),
+        new ElapsedTimeColumn() { Format = null }
     )
     .StartAsync(async ctx =>
     {
@@ -267,11 +268,12 @@ file static class Ext
 
     extension(ProgressTask task)
     {
-        public void NextTask(ProgressContext ctx, ProgressTask next)
+        public void NextTask(ProgressContext ctx, ProgressTask next, bool isDetermined = false)
         {
             task.Value = task.MaxValue;
             task.StopTask();
-            next.IsIndeterminate = false;
+            if (isDetermined)
+                next.IsIndeterminate = false;
             ctx.Refresh();
             next.StartTask();
         }
