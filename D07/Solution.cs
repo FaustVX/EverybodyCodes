@@ -14,18 +14,8 @@ public sealed class Solution : ISolution
         var names = input[..nl];
         var rules = CreateRules(input[(nl + 2)..]);
         foreach (var nameR in names.Split(','))
-        {
-            var name = names[nameR];
-            var found = true;
-            for (var i = 1; i < name.Length; i++)
-                if (!rules[name[i - 1]].Contains(name[i]))
-                {
-                    found = false;
-                    break;
-                }
-            if (found)
-                return name.ToString();
-        }
+            if (IsValidName(rules, names[nameR]))
+                return names[nameR].ToString();
         throw new NotImplementedException();
     }
 
@@ -39,15 +29,7 @@ public sealed class Solution : ISolution
         var sum = 0;
         foreach (var nameR in names.Split(','))
         {
-            var name = names[nameR];
-            var found = true;
-            for (var j = 1; j < name.Length; j++)
-                if (!rules[name[j - 1]].Contains(name[j]))
-                {
-                    found = false;
-                    break;
-                }
-            if (found)
+            if (IsValidName(rules, names[nameR]))
                 sum += i;
             i++;
         }
@@ -57,12 +39,35 @@ public sealed class Solution : ISolution
     // https://everybody.codes/event/2025/quests/7#:~:text=Part%20III
     public string Solve3(ReadOnlySpan<char> input)
     {
-        throw new NotImplementedException();
+        var nl = input.IndexOf("\n\n");
+        var names = input[..nl];
+        var rules = CreateRules(input[(nl + 2)..]);
+        var sum = 0;
+        foreach (var nameR in names.Split(','))
+        {
+            if (IsValidName(rules, names[nameR]))
+                sum += i;
+        }
+        return sum.ToString();
     }
 
-    static Dictionary<char, HashSet<char>> CreateRules(ReadOnlySpan<char> input)
+    static bool IsValidName(IReadOnlyDictionary<char, ISet<char>> rules, ReadOnlySpan<char> name)
     {
-        var rules = new Dictionary<char, HashSet<char>>(capacity: input.Count('\n') + 1);
+        var found = true;
+        for (var i = 1; i < name.Length; i++)
+            if (!rules[name[i - 1]].Contains(name[i]))
+            {
+                found = false;
+                break;
+            }
+        if (found)
+            return true;
+        return false;
+    }
+
+    static IReadOnlyDictionary<char, ISet<char>> CreateRules(ReadOnlySpan<char> input)
+    {
+        var rules = new Dictionary<char, ISet<char>>(capacity: input.Count('\n') + 1);
         foreach (var line in input.Split('\n'))
         {
             var set = new HashSet<char>(capacity: input[line].Count(',') + 1);
