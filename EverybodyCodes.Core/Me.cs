@@ -102,6 +102,7 @@ public sealed record Me(string Name, int Seed, ImmutableDictionary<int, object?>
 
         string json = await GetJsonAsync(this, year, day, $"input/{Seed}.json", "input.json");
         var path = Path.Combine($"D{day:00}", "input.json");
+        Directory.CreateDirectory(Path.GetDirectoryName(path)!);
         File.WriteAllText(path, json);
         CreateSolutionFile(year, day);
         CreateTestFile(day);
