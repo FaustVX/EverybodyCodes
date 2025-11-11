@@ -9,7 +9,7 @@
   </PropertyGroup>
 
   <ItemGroup Condition="'true'">
-    <ProjectReference Include="lib\EverybodyCodes.Core\EverybodyCodes.Core.csproj" />
+    <ProjectReference Include="lib/EverybodyCodes.Core/EverybodyCodes.Core.csproj" />
     <Compile Remove="**/obj/**;lib/**" />
     <EmbeddedResource Remove="**/obj/**;lib/**" />
     <None Remove="**/obj/**;lib/**" />
@@ -18,7 +18,7 @@
 
   <ItemGroup>
     <PackageReference Include="Newtonsoft.Json" Version="13.0.4" />
-    <PackageReference Include="Spectre.Console" Version="0.53.0" />
+    <ProjectReference Include="lib/spectre/src/Spectre.Console/Spectre.Console.csproj" />
     <PackageReference Include="CommunityToolkit.HighPerformance" Version="8.4.0" />
     <PackageReference Include="ZLinq" Version="1.4.8" />
     <PackageReference Include="Cocona.Lite" Version="2.2.0" />
