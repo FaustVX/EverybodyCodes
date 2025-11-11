@@ -18,7 +18,7 @@ app.AddCommand("run", async ([Argument] int year, [Argument] int day, [Argument]
     ])
     .StartAsync(async ctx =>
     {
-        var getMeTask = ctx.AddTask("Getting Me", maxValue: 1, autoStart: true);
+        var getMeTask = ctx.AddTask("Getting Infos", maxValue: 1, autoStart: true);
         getMeTask.IsIndeterminate = true;
         var getInputTask = ctx.AddTask("Getting input", maxValue: 1, autoStart: false);
         getInputTask.IsIndeterminate = true;
@@ -87,7 +87,7 @@ app.AddCommand("get", async ([Argument] int year, [Argument] int day, [Option('s
     )
     .StartAsync(async ctx =>
     {
-        var getMe = ctx.AddTask("Getting Me", maxValue: 1, autoStart: true);
+        var getMe = ctx.AddTask("Getting Infos", maxValue: 1, autoStart: true);
         getMe.IsIndeterminate = true;
         var getInput = ctx.AddTask("Getting input", maxValue: 1, autoStart: false);
         getInput.IsIndeterminate = true;
