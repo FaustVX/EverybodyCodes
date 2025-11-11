@@ -75,23 +75,16 @@ app.AddCommand("get", async ([Argument] int year, [Argument] int day, [Option('s
         try
         {
             var me = await Me.CreateAsync(session);
-            getMe.Value = 1;
-            ctx.Refresh();
-            getInput.StartTask();
+            getMe.NextTask(ctx, getInput);
             var input = await me.GetInputAsync(year, day);
-            getInput.Value = 1;
-            ctx.Refresh();
             var git = ctx.AddTask("Git commit", maxValue: 3, autoStart: false);
-            git.StartTask();
+            getInput.NextTask(ctx, git);
             await Shell.Git.Add($"D{day:00}/");
-            git.Value = 1;
-            ctx.Refresh();
+            git.Next(ctx);
             await Shell.Git.Commit($"D{day:00}");
-            git.Value = 2;
-            ctx.Refresh();
+            git.Next(ctx);
             await Shell.VsCode.OpenInExistingWindow($"D{day:00}/Solution.cs", $"D{day:00}/input.json", $"D{day:00}/test1.json");
-            git.Value = 3;
-            ctx.Refresh();
+            git.Next(ctx);
         }
         catch (InvalidOperationException ex)
         {
@@ -247,6 +240,23 @@ file static class Ext
         {
             using var fs = file.OpenText();
             return fs.ReadToEnd();
+        }
+    }
+
+    extension(ProgressTask task)
+    {
+        public void NextTask(ProgressContext ctx, ProgressTask next)
+        {
+            task.Value = task.MaxValue;
+            task.StopTask();
+            next.IsIndeterminate = false;
+            next.StartTask();
+            ctx.Refresh();
+        }
+        public void Next(ProgressContext ctx)
+        {
+            task.Increment(1);
+            ctx.Refresh();
         }
     }
 }
