@@ -78,7 +78,15 @@
             "label": "running"
           }
         }
-      }
+      },
+			"presentation": {
+				"echo": true,
+				"reveal": "always",
+				"focus": false,
+				"panel": "dedicated",
+				"showReuseMessage": false,
+				"clear": false
+			}
     },
     {
       "label": "run all",
@@ -104,7 +112,15 @@
             "label": "running all"
           }
         }
-      }
+      },
+			"presentation": {
+				"echo": true,
+				"reveal": "always",
+				"focus": false,
+				"panel": "dedicated",
+				"showReuseMessage": false,
+				"clear": false
+			}
     }
   ],
   "inputs": [
