@@ -51,22 +51,24 @@ app.AddCommand("run", async ([Argument] int year, [Argument] int day, [Argument]
             instanciateTask.Next(ctx);
             var addFinalLF = type.GetMethod($"Solve{p}")!.CustomAttributes.Any(a => a.AttributeType == typeof(AddFinalLineFeedAttribute));
             var input1 = addFinalLF ? input[p - 1].Input + "\n" : input[p - 1].Input;
-            var solvingTask = ctx.AddTask("Solving", maxValue: 1, autoStart: false);
+            var solvingTask = ctx.AddTask($"Solving Y{year}D{day:00}P{p}", maxValue: 1, autoStart: false);
             instanciateTask.NextTask(ctx, solvingTask);
             var output = solution.Solve(p, input1);
             var sendingTask = ctx.AddTask("Sending answer", autoStart: false, maxValue: 1);
             sendingTask.Description = input[p - 1].Answers.Length > p - 1
-                ? PrintResult(year, day, p, output, input[p - 1].Answers[p - 1])
-                : PrintResult(year, day, p, output, null);
+                ? PrintResult(output, input[p - 1].Answers[p - 1])
+                : PrintResult(output, null);
             solvingTask.NextTask(ctx, sendingTask);
             var response = await input[p - 1].AnswerAsync(output);
             // Console.WriteLine(response);
             if (response.IsCorrect && response.Time != default)
             {
-                var gitTask = ctx.AddTask("Git commit", maxValue: 1, autoStart: false);
+                var gitTask = ctx.AddTask("Git commit", maxValue: 2, autoStart: false);
                 sendingTask.NextTask(ctx, gitTask);
                 await Shell.Git.Add($"D{day:00}/");
+                gitTask.Next(ctx);
                 await Shell.Git.Commit($"D{day:00}/{p}");
+                gitTask.Next(ctx);
             }
             else if (!response.IsCorrect)
             {
@@ -83,7 +85,10 @@ app.AddCommand("run", async ([Argument] int year, [Argument] int day, [Argument]
                 }
             }
             else
+            {
                 sendingTask.Next(ctx);
+                sendingTask.StopTask();
+            }
         }
     }));
 
@@ -177,7 +182,8 @@ app.AddCommand("test", ([Argument] int year, [Argument] int day, [Argument] int?
         var startTime = TimeProvider.System.GetTimestamp();
         var output = solution.Solve(p, input1);
         Console.WriteLine(TimeProvider.System.GetElapsedTime(startTime));
-        AnsiConsole.MarkupLine(PrintResult(year, day, p, output, a.Answers[p - 1]));
+        Console.Write($"Solving Y{year}D{day:00}P{p} : ");
+        AnsiConsole.MarkupLine(PrintResult(output, a.Answers[p - 1]));
     }
 });
 
@@ -249,9 +255,9 @@ app.AddCommand("new", async ([Argument] int year, [Option('f')]string? folder, [
 
 app.Run();
 
-static string PrintResult(int year, int day, int part, string answer, string? expected)
+static string PrintResult(string answer, string? expected)
 {
-    var output = $"Y{year}D{day:00}P{part} : ";
+    string output = "";
     if (expected is not null)
         output += answer == expected ? "[green]" : "[red]";
     output += answer;
