@@ -78,6 +78,14 @@
 						"label": "running"
 					}
 				}
+			},
+			"presentation": {
+				"echo": true,
+				"reveal": "always",
+				"focus": false,
+				"panel": "dedicated",
+				"showReuseMessage": false,
+				"clear": false
 			}
 		},
 		{
@@ -104,6 +112,14 @@
 						"label": "running all"
 					}
 				}
+			},
+			"presentation": {
+				"echo": true,
+				"reveal": "always",
+				"focus": false,
+				"panel": "dedicated",
+				"showReuseMessage": false,
+				"clear": false
 			}
 		},
 	],
