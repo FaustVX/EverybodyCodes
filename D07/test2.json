@@ -1,0 +1,8 @@
+{
+    "1": null,
+    "2": null,
+    "3": {
+        "input": "Khara,Xaryt,Noxer,Kharax\n\nr > v,e,a,g,y\na > e,v,x,r,g\ne > r,x,v,t\nh > a,e,v\ng > r,y\ny > p,t\ni > v,r\nK > h\nv > e\nB > r\nt > h\nN > e\np > h\nH > e\nl > t\nz > e\nX > a\nn > v\nx > z\nT > i",
+        "answer": "1154"
+    }
+}
