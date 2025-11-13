@@ -27,7 +27,21 @@ public sealed class Solution : ISolution
     // https://everybody.codes/event/2025/quests/8#:~:text=Part%20II
     public string Solve2(ReadOnlySpan<char> input)
     {
-        throw new NotImplementedException();
+        var nails = input.Split(',').CastTo<int>();
+        nails.MoveNext();
+        var last = nails.Current;
+        var count = 0L;
+        var lines = (stackalloc (int start, int end)[input.Count(',')]);
+        var nextLines = lines;
+        foreach (var nail in nails)
+        {
+            var line = (Math.Min(nail, last), Math.Max(nail, last));
+            count += CrossedLines(line, lines);
+            nextLines[0] = line;
+            nextLines = nextLines[1..];
+            last = nail;
+        }
+        return count.ToString();
     }
 
     // https://everybody.codes/event/2025/quests/8#:~:text=Part%20III
@@ -35,6 +49,14 @@ public sealed class Solution : ISolution
     {
         throw new NotImplementedException();
     }
+
+    static int CrossedLines((int start, int end) line, ReadOnlySpan<(int start, int end)> lines)
+    => lines.AsValueEnumerable()
+        .Count(l => CrossALine(line, l));
+
+    static bool CrossALine((int start, int end) line1, (int start, int end) line2)
+    => (line1.start > line2.start && line1.start < line2.end && line1.end > line2.end)
+    || (line2.start > line1.start && line2.start < line1.end && line2.end > line1.end);
 }
 
 file static class Ext
