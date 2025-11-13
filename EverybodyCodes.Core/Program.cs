@@ -63,11 +63,13 @@ app.AddCommand("run", async ([Argument] int year, [Argument] int day, [Argument]
             // Console.WriteLine(response);
             if (response.IsCorrect && response.Time != default)
             {
-                var gitTask = ctx.AddTask("Git commit", maxValue: 2, autoStart: false);
+                var gitTask = ctx.AddTask("Git commit", maxValue: 3, autoStart: false);
                 sendingTask.NextTask(ctx, gitTask);
                 await Shell.Git.Add($"D{day:00}/");
                 gitTask.Next(ctx);
                 await Shell.Git.Commit($"D{day:00}/{p}");
+                gitTask.Next(ctx);
+                await Shell.VsCode.OpenInExistingWindow($"D{day:00}/test1.json");
                 gitTask.Next(ctx);
             }
             else if (!response.IsCorrect)
