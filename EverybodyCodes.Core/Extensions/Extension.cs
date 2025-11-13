@@ -84,4 +84,31 @@ public static partial class Extension
             return n * mul + other;
         }
     }
+
+    extension(System.MemoryExtensions.SpanSplitEnumerator<char> enumerator)
+    {
+        public SpanSplitCastEnumerator<T> ParseTo<T>()
+        where T : ISpanParsable<T>
+        => new(enumerator.GetEnumerator(), T.Parse);
+        public SpanSplitCastEnumerator<T> ParseTo<T>(Func<ReadOnlySpan<char>, IFormatProvider?, T> parser)
+        where T : allows ref struct
+        => new(enumerator.GetEnumerator(), parser);
+        public SpanSplitCastEnumerator<ReadOnlySpan<char>> ToSpans()
+        => new(enumerator.GetEnumerator(), static (s, _) => s);
+    }
+
+    public ref struct SpanSplitCastEnumerator<T>(System.MemoryExtensions.SpanSplitEnumerator<char> enumerator, Func<ReadOnlySpan<char>, IFormatProvider?, T> parser)
+    where T : allows ref struct
+    {
+        private System.MemoryExtensions.SpanSplitEnumerator<char> _enumerator = enumerator;
+
+        public readonly SpanSplitCastEnumerator<T> GetEnumerator()
+        => this;
+
+        public readonly T Current
+        => parser(_enumerator.Source[_enumerator.Current], null);
+
+        public bool MoveNext()
+        => _enumerator.MoveNext();
+    }
 }
