@@ -1,5 +1,6 @@
 using System.Collections.Immutable;
 using EverybodyCodes.Core;
+using EverybodyCodes.Core.Extensions;
 using ZLinq;
 
 namespace Y2025.D07;
@@ -13,9 +14,9 @@ public sealed class Solution : ISolution
         var nl = input.IndexOf("\n\n");
         var names = input[..nl];
         var rules = CreateRules(input[(nl + 2)..]);
-        foreach (var nameR in names.Split(','))
-            if (IsValidName(rules, names[nameR]))
-                return names[nameR].ToString();
+        foreach (var name in names.Split(',').ToSpans())
+            if (IsValidName(rules, name))
+                return name.ToString();
         throw new NotImplementedException();
     }
 
@@ -27,9 +28,9 @@ public sealed class Solution : ISolution
         var rules = CreateRules(input[(nl + 2)..]);
         var i = 1;
         var sum = 0;
-        foreach (var nameR in names.Split(','))
+        foreach (var name in names.Split(',').ToSpans())
         {
-            if (IsValidName(rules, names[nameR]))
+            if (IsValidName(rules, name))
                 sum += i;
             i++;
         }
@@ -43,9 +44,9 @@ public sealed class Solution : ISolution
         var names = input[..nl];
         var rules = CreateRules(input[(nl + 2)..]);
         var set = new HashSet<string>(capacity: 10_000);
-        foreach (var nameR in names.Split(','))
-            if (IsValidName(rules, names[nameR]))
-                GenerateNames(names[nameR].ToImmutableArray(), set, rules);
+        foreach (var name in names.Split(',').ToSpans())
+            if (IsValidName(rules, name))
+                GenerateNames(name.ToImmutableArray(), set, rules);
         return set.Count.ToString();
 
         static int GenerateNames(ImmutableArray<char> name, HashSet<string> names, IReadOnlyDictionary<char, IReadOnlySet<char>> rules)
@@ -109,8 +110,6 @@ file static class Ext
     extension<TKey, TValue>(IReadOnlyDictionary<TKey, TValue> dict)
     {
         public TValue? TryGet(TKey key)
-        {
-            return CollectionExtensions.GetValueOrDefault(dict, key);
-        }
+        => CollectionExtensions.GetValueOrDefault(dict, key);
     }
 }

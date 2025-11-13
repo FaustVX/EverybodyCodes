@@ -1,6 +1,7 @@
 using System.Diagnostics;
 using System.Numerics;
 using EverybodyCodes.Core;
+using EverybodyCodes.Core.Extensions;
 
 namespace Y2025.D01;
 
@@ -15,9 +16,8 @@ public sealed class Solution : ISolution
         var ranges = (stackalloc Range[names.Count(',') + 1]);
         names.Split(ranges, ',');
         var index = 0;
-        var instructions = input[(input.IndexOf('\n') + 2)..];
-        foreach (var instruction in instructions.Split(','))
-            index = instructions[instruction] switch 
+        foreach (var instruction in input[(input.IndexOf('\n') + 2)..].Split(',').ToSpans())
+            index = instruction switch 
             {
                 ['L', .. var dir] when int.TryParse(dir, out var a)
                     => function(-a, index, ranges),

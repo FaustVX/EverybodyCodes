@@ -1,5 +1,4 @@
 using ZLinq;
-using CommunityToolkit.HighPerformance;
 using EverybodyCodes.Core;
 using EverybodyCodes.Core.Extensions;
 using System.Diagnostics;
@@ -19,9 +18,9 @@ public sealed class Solution : ISolution
     public string Solve2(ReadOnlySpan<char> input)
     {
         var (min, max) = (long.MaxValue, long.MinValue);
-        foreach (var line in input.Split('\n'))
+        foreach (var segment in input.Split('\n').ParseTo<Segment>())
         {
-            var quality = Segment.Parse(input[line]).Quality;
+            var quality = segment.Quality;
             if (quality < min)
                 min = quality;
             if (quality > max)
@@ -34,8 +33,8 @@ public sealed class Solution : ISolution
     public string Solve3(ReadOnlySpan<char> input)
     {
         var swords = new List<Segment>(capacity: input.Count('\n') + 1);
-        foreach (var line in input.Split('\n'))
-            swords.Add(Segment.Parse(input[line]));
+        foreach (var segment in input.Split('\n').ParseTo<Segment>())
+            swords.Add(segment);
         swords.Sort((l, r) =>
         {
             if (l.Quality.CompareTo(r.Quality) is not 0 and var c)
@@ -49,7 +48,7 @@ public sealed class Solution : ISolution
     }
 }
 
-file sealed record class Segment(int ID, int Central)
+file sealed record class Segment(int ID, int Central) : ISpanParsable<Segment>
 {
     public int? Left { get; set; }
     public int? Right { get; set; }
@@ -92,52 +91,37 @@ file sealed record class Segment(int ID, int Central)
 
     public override string ToString()
     => $"{Quality}";
+
+    static Segment ISpanParsable<Segment>.Parse(ReadOnlySpan<char> s, IFormatProvider? provider)
+    => Parse(s);
+
+    static bool ISpanParsable<Segment>.TryParse(ReadOnlySpan<char> s, IFormatProvider? provider, out Segment result)
+    {
+        result = Parse(s);
+        return true;
+    }
+
+    static Segment IParsable<Segment>.Parse(string s, IFormatProvider? provider)
+    => Parse(s);
+
+    static bool IParsable<Segment>.TryParse(string? s, IFormatProvider? provider, out Segment result)
+    {
+        result = Parse(s);
+        return true;
+    }
 }
 
 file static class Ext
 {
-    extension<T>(System.MemoryExtensions.SpanSplitEnumerator<T> enumerator)
+    extension<T>(MemoryExtensions.SpanSplitEnumerator<T> enumerator)
     where T : IEquatable<T>
     {
-        public System.MemoryExtensions.SpanSplitEnumerator<T> Skip(int count = 1)
+        public MemoryExtensions.SpanSplitEnumerator<T> Skip(int count = 1)
         {
             enumerator = enumerator.GetEnumerator();
             for (var i = 0; i < count; i++)
                 enumerator.MoveNext();
             return enumerator;
-        }
-    }
-
-    extension<T>(T n)
-    where T : System.Numerics.IBinaryInteger<T>
-    {
-        public int GetDecimalLength()
-        {
-            if (T.IsZero(n))
-                return 1;
-            n = T.Abs(n);
-            var ten = T.CreateChecked(10);
-            var length = 0;
-            while (n > T.Zero)
-            {
-                n /= ten;
-                length++;
-            }
-            return length;
-        }
-
-        public T Concat(T other)
-        {
-            if (T.IsZero(n))
-                return other;
-            if (T.IsZero(other))
-                return n;
-            var length = other.GetDecimalLength();
-            var ten = T.CreateChecked(10);
-            var mul = T.One;
-            for (var i = 0; i < length; i++)
-                mul *= ten;
-            return n * mul + other;
         }
     }
 }

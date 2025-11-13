@@ -11,7 +11,7 @@ public sealed class Solution : ISolution
     public string Solve1(ReadOnlySpan<char> input)
     {
         var halfLength = (Globals.IsTest ? 8 : 32) / 2;
-        var nails = input.Split(',').CastTo<int>();
+        var nails = input.Split(',').ParseTo<int>();
         nails.MoveNext();
         var last = nails.Current;
         var count = 0;
@@ -27,7 +27,7 @@ public sealed class Solution : ISolution
     // https://everybody.codes/event/2025/quests/8#:~:text=Part%20II
     public string Solve2(ReadOnlySpan<char> input)
     {
-        var nails = input.Split(',').CastTo<int>();
+        var nails = input.Split(',').ParseTo<int>();
         nails.MoveNext();
         var last = nails.Current;
         var count = 0L;
@@ -49,7 +49,7 @@ public sealed class Solution : ISolution
     {
         var lines = (stackalloc (int start, int end)[input.Count(',')]);
         {
-            var nails = input.Split(',').CastTo<int>();
+            var nails = input.Split(',').ParseTo<int>();
             nails.MoveNext();
             var last = nails.Current;
             var nextLines = lines;
@@ -81,29 +81,4 @@ public sealed class Solution : ISolution
     static bool CrossALine((int start, int end) line1, (int start, int end) line2)
     => (line1.start > line2.start && line1.start < line2.end && line1.end > line2.end)
     || (line2.start > line1.start && line2.start < line1.end && line2.end > line1.end);
-}
-
-file static class Ext
-{
-    extension(MemoryExtensions.SpanSplitEnumerator<char> enumerator)
-    {
-        public Enumerator<T> CastTo<T>()
-        where T : ISpanParsable<T>
-        => new(enumerator.GetEnumerator());
-    }
-
-    public ref struct Enumerator<T>(MemoryExtensions.SpanSplitEnumerator<char> enumerator)
-    where T : ISpanParsable<T>
-    {
-        private MemoryExtensions.SpanSplitEnumerator<char> _enumerator = enumerator;
-
-        public readonly Enumerator<T> GetEnumerator()
-        => this;
-
-        public readonly T Current
-        => T.Parse(_enumerator.Source[_enumerator.Current], null);
-
-        public bool MoveNext()
-        => _enumerator.MoveNext();
-    }
 }

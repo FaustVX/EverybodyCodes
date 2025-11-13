@@ -1,8 +1,6 @@
-using ZLinq;
 using CommunityToolkit.HighPerformance;
 using EverybodyCodes.Core;
 using EverybodyCodes.Core.Extensions;
-using System.Diagnostics;
 
 namespace Y2025.D04;
 
@@ -30,9 +28,7 @@ public sealed class Solution : ISolution
     {
         var previous = decimal.Parse(input[..input.IndexOf('\n')]);
         var ratio = 1m;
-        foreach (var range in input.Split('\n').Skip())
-        {
-            var gear = input[range];
+        foreach (var gear in input.Split('\n').Skip().ToSpans())
             if (gear.IndexOf('|') is var pipe and not < 0)
             {
                 var left = decimal.Parse(gear[..pipe]);
@@ -41,7 +37,6 @@ public sealed class Solution : ISolution
             }
             else
                 ratio /= decimal.Parse(gear) / previous;
-        }
         return ((long)(ratio * 100)).ToString();
     }
 }
