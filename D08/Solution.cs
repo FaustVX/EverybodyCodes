@@ -47,7 +47,31 @@ public sealed class Solution : ISolution
     // https://everybody.codes/event/2025/quests/8#:~:text=Part%20III
     public string Solve3(ReadOnlySpan<char> input)
     {
-        throw new NotImplementedException();
+        var lines = (stackalloc (int start, int end)[input.Count(',')]);
+        {
+            var nails = input.Split(',').CastTo<int>();
+            nails.MoveNext();
+            var last = nails.Current;
+            var nextLines = lines;
+            foreach (var nail in nails)
+            {
+                nextLines[0] = (Math.Min(nail, last), Math.Max(nail, last));
+                nextLines = nextLines[1..];
+                last = nail;
+            }
+        }
+        var length = Globals.IsTest ? 8 : 256;
+        var max = 0L;
+        for (var i = 1; i <= length; i++)
+            for (var j = i + 1; j <= length; j++)
+            {
+                var count = CrossedLines((i, j), lines);
+                if (lines.Contains((i, j)))
+                    count++;
+                if (count > max)
+                    max = count;
+            }
+        return max.ToString();
     }
 
     static int CrossedLines((int start, int end) line, ReadOnlySpan<(int start, int end)> lines)
