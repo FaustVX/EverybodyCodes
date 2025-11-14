@@ -48,11 +48,10 @@ public static class Shell
 
     public static class VsCode
     {
-        public static Task OpenInExistingWindow(params IEnumerable<string> args)
-        => Process.Start(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), @"Programs\Microsoft VS Code\Code.exe"), ["--profile", "C#", "--reuse-window", "--", ..args]).WaitForExitAsync();
+        public static Task OpenInExistingWindow(IEnumerable<string> files, bool wait = false, params IEnumerable<string> args)
+        => StartAsync(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), @"Programs\Microsoft VS Code\Code.exe"), ["--profile", "C#", "--reuse-window", ..wait ? ["--wait"] : Array.Empty<string>(), ..args, "--", ..files]);
 
-        public static Task OpenInNewWindow(params IEnumerable<string> args)
-        => Process.Start(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), @"Programs\Microsoft VS Code\Code.exe"), ["--profile", "C#", "--new-window", "--", ..args]).WaitForExitAsync();
+        public static Task OpenInNewWindow(IEnumerable<string> files, bool wait = false, params IEnumerable<string> args)
+        => StartAsync(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), @"Programs\Microsoft VS Code\Code.exe"), ["--profile", "C#", "--new-window", ..wait ? ["--wait"] : Array.Empty<string>(), ..args, "--", ..files]);
     }
-
 }

@@ -69,7 +69,8 @@ app.AddCommand("run", async ([Argument] int year, [Argument] int day, [Argument]
                 gitTask.Next(ctx);
                 await Shell.Git.Commit($"D{day:00}/{p}");
                 gitTask.Next(ctx);
-                await Shell.VsCode.OpenInExistingWindow($"D{day:00}/test1.json");
+                await Shell.VsCode.OpenInExistingWindow([$"D{day:00}/test1.json"], wait: true);
+                await Shell.Git.Add($"D{day:00}/");
                 gitTask.Next(ctx);
             }
             else if (!response.IsCorrect)
@@ -119,11 +120,12 @@ app.AddCommand("get", async ([Argument] int year, [Argument] int day, [Option('s
             // var description = await me.GetDescriptionAsync(year, day);
             var gitTask = ctx.AddTask("Git commit", maxValue: 3, autoStart: false);
             getInputTask.NextTask(ctx, gitTask);
+            await Shell.VsCode.OpenInExistingWindow([$"D{day:00}/Solution.cs", $"D{day:00}/test1.json"], wait: false);
+            await Shell.VsCode.OpenInExistingWindow([$"D{day:00}/input.json"], wait: true);
+            gitTask.Next(ctx);
             await Shell.Git.Add($"D{day:00}/");
             gitTask.Next(ctx);
             await Shell.Git.Commit($"D{day:00}");
-            gitTask.Next(ctx);
-            await Shell.VsCode.OpenInExistingWindow($"D{day:00}/Solution.cs", $"D{day:00}/input.json", $"D{day:00}/test1.json");
             gitTask.Next(ctx);
         }
         catch (Exception ex)
@@ -252,7 +254,7 @@ app.AddCommand("new", async ([Argument] int year, [Option('f')]string? folder, [
 
     await Shell.Git.Add(".");
     await Shell.Git.Commit(year.ToString());
-    await Shell.VsCode.OpenInNewWindow("./");
+    await Shell.VsCode.OpenInNewWindow(["./"]);
 });
 
 app.Run();
