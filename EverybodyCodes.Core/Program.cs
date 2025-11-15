@@ -9,7 +9,14 @@ using Spectre.Console;
 
 var app = CoconaLiteApp.Create(args);
 
-app.AddCommand("run", async ([Argument] int year, [Argument] int day, [Argument] int? part, [Option('s')] string session)
+app.AddCommand("run", Run);
+app.AddCommand("get", Get);
+app.AddCommand("test", Test);
+app.AddCommand("new", New);
+
+app.Run();
+
+static async Task Run([Argument] int year, [Argument] int day, [Argument] int? part, [Option('s')] string session)
 => await AnsiConsole.Progress()
     .Columns([
         new TaskDescriptionColumn(),
@@ -100,9 +107,9 @@ app.AddCommand("run", async ([Argument] int year, [Argument] int day, [Argument]
                 sendingTask.StopTask();
             }
         }
-    }));
+    });
 
-app.AddCommand("get", async ([Argument] int year, [Argument] int day, [Option('s')] string session)
+static async Task Get([Argument] int year, [Argument] int day, [Option('s')] string session)
 => await AnsiConsole.Progress()
     .Columns(
         new TaskDescriptionColumn(),
@@ -160,9 +167,9 @@ app.AddCommand("get", async ([Argument] int year, [Argument] int day, [Option('s
             }
             return;
         }
-    }));
+    });
 
-app.AddCommand("test", ([Argument] int year, [Argument] int day, [Argument] int? part, [Option('f')]string file) =>
+static void Test([Argument] int year, [Argument] int day, [Argument] int? part, [Option('f')]string file)
 {
     Globals.IsTest = true;
     Console.WriteLine("Test file: " + Path.GetRelativePath(Path.GetFullPath($"D{day:00}"), file));
@@ -198,9 +205,9 @@ app.AddCommand("test", ([Argument] int year, [Argument] int day, [Argument] int?
         Console.Write($"Solving Y{year}D{day:00}P{p} : ");
         AnsiConsole.MarkupLine(PrintResult(output, part.Answers[p - 1]));
     }
-});
+};
 
-app.AddCommand("new", async ([Argument] int year, [Option('f')]string? folder, [Option('r')] string repo = "git@github.com:FaustVX/EverybodyCodes.git", [Option('b')] string branch = "main", [Option('w')] bool withoutWorktree = false) =>
+static async Task New([Argument] int year, [Option('f')]string? folder, [Option('r')] string repo = "git@github.com:FaustVX/EverybodyCodes.git", [Option('b')] string branch = "main", [Option('w')] bool withoutWorktree = false)
 {
     var worktree = folder ?? Path.Combine(["..", ..!Directory.Exists("lib") ? [".."] : ReadOnlySpan<string>.Empty, year.ToString()]);
     if (withoutWorktree)
@@ -264,9 +271,7 @@ app.AddCommand("new", async ([Argument] int year, [Option('f')]string? folder, [
     await Shell.Git.Add(".");
     await Shell.Git.Commit(year.ToString());
     await Shell.VsCode.OpenInNewWindow(["./"]);
-});
-
-app.Run();
+};
 
 static string PrintResult(string answer, string? expected)
 {
