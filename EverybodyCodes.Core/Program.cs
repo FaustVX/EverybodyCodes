@@ -56,6 +56,12 @@ static async Task Run([Argument] int year, [Argument] int day, [Argument] int? p
 
         static async Task RunPart(int year, int day, Part[] parts, Type type, ISolution solution, int part, ProgressContext ctx, ProgressTask instanciateTask, string session)
         {
+            var me = await Me.CreateAsync(session);
+            if (me.PenaltySpan.TotalSeconds > 0 && parts[part - 1].Answers.Length < part)
+            {
+                await Wait(ctx, session, instanciateTask);
+                return;
+            }
             instanciateTask.Next(ctx);
             var addFinalLF = type.GetMethod($"Solve{part}")!.CustomAttributes.Any(a => a.AttributeType == typeof(AddFinalLineFeedAttribute));
             var input1 = addFinalLF ? parts[part - 1].Input + "\n" : parts[part - 1].Input;
@@ -89,10 +95,18 @@ static async Task Run([Argument] int year, [Argument] int day, [Argument] int? p
                 gitTask.Next(ctx);
             }
             else if (!response.IsCorrect)
+                await Wait(ctx, session, sendingTask);
+            else
+            {
+                sendingTask.Next(ctx);
+                sendingTask.StopTask();
+            }
+
+            static async Task Wait(ProgressContext ctx, string session, ProgressTask previousTask)
             {
                 var me = await Me.CreateAsync(session);
-                var waitTask = ctx.AddTask("Wait 60 seconds", maxValue: me.PenaltySpan.TotalSeconds, autoStart: false);
-                sendingTask.NextTask(ctx, waitTask);
+                var waitTask = ctx.AddTask($"Wait {(int)me.PenaltySpan.TotalSeconds} seconds", maxValue: me.PenaltySpan.TotalSeconds, autoStart: false);
+                previousTask.NextTask(ctx, waitTask);
                 while (!ctx.IsFinished)
                 {
                     if (me.PenaltySpan.TotalSeconds >= 10)
@@ -101,11 +115,6 @@ static async Task Run([Argument] int year, [Argument] int day, [Argument] int? p
                     waitTask.Value = waitTask.MaxValue - me.PenaltySpan.TotalSeconds;
                     waitTask.Description = $"Wait {(int)me.PenaltySpan.TotalSeconds} seconds";
                 }
-            }
-            else
-            {
-                sendingTask.Next(ctx);
-                sendingTask.StopTask();
             }
         }
     });
