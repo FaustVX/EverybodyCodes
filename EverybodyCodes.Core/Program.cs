@@ -274,15 +274,13 @@ static string PrintResult(string answer, string? expected)
     string output = "";
     if (expected is not null)
         output += answer == expected ? "[green]" : "[red]";
-    output += answer;
-    if (expected is not null)
-        output += "[/]";
+    output += Markup.Escape(answer);
     if (expected is not null)
     {
         var op = Operator<long>(answer, expected)
             ?? Operator<decimal>(answer, expected)
             ?? (answer == expected ? "==" : "!=");
-        output += $" {op} {expected}";
+        output += $"[/] {op} {Markup.Escape(expected)}";
     }
 
     return output;
