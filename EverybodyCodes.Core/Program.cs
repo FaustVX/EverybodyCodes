@@ -63,7 +63,7 @@ app.AddCommand("run", async ([Argument] int year, [Argument] int day, [Argument]
             // Console.WriteLine(response);
             if (response.IsCorrect && response.Time != default)
             {
-                var gitTask = ctx.AddTask("Git commit", maxValue: 3, autoStart: false);
+                var gitTask = ctx.AddTask("Git commit", maxValue: 4, autoStart: false);
                 sendingTask.NextTask(ctx, gitTask);
                 await Shell.Git.Add($"D{day:00}/");
                 gitTask.Next(ctx);
@@ -71,6 +71,13 @@ app.AddCommand("run", async ([Argument] int year, [Argument] int day, [Argument]
                 gitTask.Next(ctx);
                 await Shell.VsCode.OpenInExistingWindow([$"D{day:00}/test1.json"], wait: true);
                 await Shell.Git.Add($"D{day:00}/");
+                gitTask.Next(ctx);
+                if (p == 3)
+                {
+                    await Shell.Git.Checkout("main");
+                    await Shell.Git.Merge($"days/{year}/{day:00}", ff: false);
+                }
+
                 gitTask.Next(ctx);
             }
             else if (!response.IsCorrect)
@@ -118,8 +125,10 @@ app.AddCommand("get", async ([Argument] int year, [Argument] int day, [Option('s
             // getDescriptionTask.IsIndeterminate = true;
             // getInputTask.NextTask(ctx, getDescriptionTask);
             // var description = await me.GetDescriptionAsync(year, day);
-            var gitTask = ctx.AddTask("Git commit", maxValue: 3, autoStart: false);
+            var gitTask = ctx.AddTask("Git commit", maxValue: 4, autoStart: false);
             getInputTask.NextTask(ctx, gitTask);
+            await Shell.Git.Checkout($"days/{year}/{day:00}", create: true);
+            gitTask.Next(ctx);
             await Shell.VsCode.OpenInExistingWindow([$"D{day:00}/Solution.cs", $"D{day:00}/test1.json"], wait: false);
             await Shell.VsCode.OpenInExistingWindow([$"D{day:00}/input.json"], wait: true);
             gitTask.Next(ctx);

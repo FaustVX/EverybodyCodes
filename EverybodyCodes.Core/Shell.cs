@@ -32,6 +32,14 @@ public static class Shell
             public static Task Add(string? branch, string folder, bool isOrphan = false, params ReadOnlySpan<string> args)
             => StartAsync("git", ["worktree", "add", ..branch is string b ? ["-b", branch] : Array.Empty<string>(), ..isOrphan ? ["--orphan"] : Array.Empty<string>(), folder, ..args]);
         }
+        public static Task Checkout(string branch, bool create = false, params ReadOnlySpan<string> args)
+        => StartAsync("git", ["checkout", ..args, ..create ? ["-b"] : Array.Empty<string>(), branch]);
+
+        public static Task Merge(ReadOnlySpan<string> branches, bool? ff = null, params ReadOnlySpan<string> args)
+        => StartAsync("git", ["merge", ..args, ..ff switch { null => Array.Empty<string>(), true => ["--ff"], false => ["--no-ff"]}, ..branches]);
+
+        public static Task Merge(string branch, bool? ff = null, params ReadOnlySpan<string> args)
+        => Merge([branch], ff, args);
     }
 
     public static class Dotnet
