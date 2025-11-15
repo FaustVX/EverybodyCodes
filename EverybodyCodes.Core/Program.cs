@@ -1,4 +1,5 @@
-﻿using System.Globalization;
+﻿using System.Diagnostics;
+using System.Globalization;
 using System.Numerics;
 using System.Reflection;
 using Cocona;
@@ -58,7 +59,7 @@ static async Task Run([Argument] int year, [Argument] int day, [Argument] int? p
             instanciateTask.Next(ctx);
             var addFinalLF = type.GetMethod($"Solve{part}")!.CustomAttributes.Any(a => a.AttributeType == typeof(AddFinalLineFeedAttribute));
             var input1 = addFinalLF ? parts[part - 1].Input + "\n" : parts[part - 1].Input;
-            var solvingTask = ctx.AddTask($"Solving Y{year}D{day:00}P{part}", maxValue: 1, autoStart: false);
+            var solvingTask = ctx.AddTask($"Solving Y[red]{year}[/]D[green]{day:00}[/]P{PartColor(part)}", maxValue: 1, autoStart: false);
             instanciateTask.NextTask(ctx, solvingTask);
             var output = solution.Solve(part, input1);
             var sendingTask = ctx.AddTask("Sending answer", autoStart: false, maxValue: 1);
@@ -198,7 +199,7 @@ static void Test([Argument] int year, [Argument] int day, [Argument] int? part)
         var startTime = TimeProvider.System.GetTimestamp();
         var output = solution.Solve(p, input1);
         Console.WriteLine(TimeProvider.System.GetElapsedTime(startTime));
-        Console.Write($"Solving Y{year}D{day:00}P{p} : ");
+        AnsiConsole.Markup($"Solving Y[red]{year}[/]D[green]{day:00}[/]P{PartColor(p)} : ");
         AnsiConsole.MarkupLine(PrintResult(output, part.Answers[0]));
     }
 };
@@ -298,6 +299,15 @@ static string PrintResult(string answer, string? expected)
         return null;
     }
 }
+
+static string PartColor(int part)
+=> string.Format("[{0}]{1}[/]", part switch
+{
+    1 => "blue",
+    2 => "magenta",
+    3 => "cyan",
+    _ => throw new UnreachableException(),
+}, part);
 
 file static class Ext
 {
