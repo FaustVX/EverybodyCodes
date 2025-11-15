@@ -48,10 +48,16 @@ public static class Shell
 
     public static class VsCode
     {
+        private static readonly string code = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), @"Programs\Microsoft VS Code\Code.exe");
+        /// <summary>
+        /// Set to <see langword="null"/> if you don't use profile in VScode
+        /// </summary>
+        private static readonly string? profile = "C#";
+
         public static Task OpenInExistingWindow(IEnumerable<string> files, bool wait = false, params IEnumerable<string> args)
-        => StartAsync(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), @"Programs\Microsoft VS Code\Code.exe"), ["--profile", "C#", "--reuse-window", ..wait ? ["--wait"] : Array.Empty<string>(), ..args, "--", ..files]);
+        => StartAsync(code, [..profile is not null ? ["--profile", profile] : Array.Empty<string>(), "--reuse-window", ..wait ? ["--wait"] : Array.Empty<string>(), ..args, "--", ..files]);
 
         public static Task OpenInNewWindow(IEnumerable<string> files, bool wait = false, params IEnumerable<string> args)
-        => StartAsync(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), @"Programs\Microsoft VS Code\Code.exe"), ["--profile", "C#", "--new-window", ..wait ? ["--wait"] : Array.Empty<string>(), ..args, "--", ..files]);
+        => StartAsync(code, [..profile is not null ? ["--profile", profile] : Array.Empty<string>(), "--new-window", ..wait ? ["--wait"] : Array.Empty<string>(), ..args, "--", ..files]);
     }
 }
