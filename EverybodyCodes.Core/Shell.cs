@@ -10,6 +10,17 @@ public static class Shell
     public static void Start(string cmd, params ReadOnlySpan<string> args)
     => Process.Start(cmd, [..args])!.WaitForExit();
 
+    private static string Expand(bool b, string @true = "", string @false = "")
+    => b ? @true : @false;
+
+    private static string Expand(bool? b, string @true = "", string @false = "", string @null = "")
+    => b switch
+    {
+        true => @true,
+        false => @false,
+        null => @null,
+    };
+
     public static class Git
     {
         public static Task Commit(string message, params ReadOnlySpan<string> args)
@@ -24,19 +35,19 @@ public static class Shell
             public static Task Add(string repo, string folder, string? branch = null, params ReadOnlySpan<string> args)
             => StartAsync("git", ["submodule", "add", ..branch is not null ? ["-b", branch] : Array.Empty<string>(), ..args, "--", repo, folder]);
             public static Task Update(bool init = false, bool recursive = false, params ReadOnlySpan<string> args)
-            => StartAsync("git", ["submodule", "update", ..init ? ["--init"] : Array.Empty<string>(), ..recursive ? ["--recursive"] : Array.Empty<string>(), ..args]);
+            => StartAsync("git", ["submodule", "update", Expand(init, "--init"), Expand(recursive, "--recursive"), ..args]);
         }
 
         public static class Worktree
         {
-            public static Task Add(string? branch, string folder, bool isOrphan = false, params ReadOnlySpan<string> args)
-            => StartAsync("git", ["worktree", "add", ..branch is string b ? ["-b", branch] : Array.Empty<string>(), ..isOrphan ? ["--orphan"] : Array.Empty<string>(), folder, ..args]);
+            public static Task Add(string? branch, string folder, bool orphan = false, params ReadOnlySpan<string> args)
+            => StartAsync("git", ["worktree", "add", ..branch is string b ? ["-b", branch] : Array.Empty<string>(), Expand(orphan, "--orphan"), folder, ..args]);
         }
         public static Task Checkout(string branch, bool create = false, params ReadOnlySpan<string> args)
-        => StartAsync("git", ["checkout", ..args, ..create ? ["-b"] : Array.Empty<string>(), branch]);
+        => StartAsync("git", ["checkout", ..args, Expand(create, "-b"), branch]);
 
         public static Task Merge(ReadOnlySpan<string> branches, bool? ff = null, params ReadOnlySpan<string> args)
-        => StartAsync("git", ["merge", ..args, ..ff switch { null => Array.Empty<string>(), true => ["--ff"], false => ["--no-ff"]}, ..branches]);
+        => StartAsync("git", ["merge", ..args, Expand(ff, "--ff", "--no-ff"), ..branches]);
 
         public static Task Merge(string branch, bool? ff = null, params ReadOnlySpan<string> args)
         => Merge([branch], ff, args);
@@ -63,9 +74,9 @@ public static class Shell
         private static readonly string? profile = "C#";
 
         public static Task OpenInExistingWindow(IEnumerable<string> files, bool wait = false, params IEnumerable<string> args)
-        => StartAsync(code, [..profile is not null ? ["--profile", profile] : Array.Empty<string>(), "--reuse-window", ..wait ? ["--wait"] : Array.Empty<string>(), ..args, "--", ..files]);
+        => StartAsync(code, [..profile is not null ? ["--profile", profile] : Array.Empty<string>(), "--reuse-window", Expand(wait, "--wait"), ..args, "--", ..files]);
 
         public static Task OpenInNewWindow(IEnumerable<string> files, bool wait = false, params IEnumerable<string> args)
-        => StartAsync(code, [..profile is not null ? ["--profile", profile] : Array.Empty<string>(), "--new-window", ..wait ? ["--wait"] : Array.Empty<string>(), ..args, "--", ..files]);
+        => StartAsync(code, [..profile is not null ? ["--profile", profile] : Array.Empty<string>(), "--new-window", Expand(wait, "--wait"), ..args, "--", ..files]);
     }
 }
