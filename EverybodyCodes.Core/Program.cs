@@ -46,20 +46,20 @@ app.AddCommand("run", async ([Argument] int year, [Argument] int day, [Argument]
             return;
         }
 
-        static async Task RunPart(int year, int day, Part[] input, Type type, ISolution solution, int p, ProgressContext ctx, ProgressTask instanciateTask, string session)
+        static async Task RunPart(int year, int day, Part[] parts, Type type, ISolution solution, int part, ProgressContext ctx, ProgressTask instanciateTask, string session)
         {
             instanciateTask.Next(ctx);
-            var addFinalLF = type.GetMethod($"Solve{p}")!.CustomAttributes.Any(a => a.AttributeType == typeof(AddFinalLineFeedAttribute));
-            var input1 = addFinalLF ? input[p - 1].Input + "\n" : input[p - 1].Input;
-            var solvingTask = ctx.AddTask($"Solving Y{year}D{day:00}P{p}", maxValue: 1, autoStart: false);
+            var addFinalLF = type.GetMethod($"Solve{part}")!.CustomAttributes.Any(a => a.AttributeType == typeof(AddFinalLineFeedAttribute));
+            var input1 = addFinalLF ? parts[part - 1].Input + "\n" : parts[part - 1].Input;
+            var solvingTask = ctx.AddTask($"Solving Y{year}D{day:00}P{part}", maxValue: 1, autoStart: false);
             instanciateTask.NextTask(ctx, solvingTask);
-            var output = solution.Solve(p, input1);
+            var output = solution.Solve(part, input1);
             var sendingTask = ctx.AddTask("Sending answer", autoStart: false, maxValue: 1);
-            sendingTask.Description = input[p - 1].Answers.Length > p - 1
-                ? PrintResult(output, input[p - 1].Answers[p - 1])
+            sendingTask.Description = parts[part - 1].Answers.Length > part - 1
+                ? PrintResult(output, parts[part - 1].Answers[part - 1])
                 : PrintResult(output, null);
             solvingTask.NextTask(ctx, sendingTask);
-            var response = await input[p - 1].AnswerAsync(output);
+            var response = await parts[part - 1].AnswerAsync(output);
             // Console.WriteLine(response);
             if (response.IsCorrect && response.Time != default)
             {
@@ -67,12 +67,12 @@ app.AddCommand("run", async ([Argument] int year, [Argument] int day, [Argument]
                 sendingTask.NextTask(ctx, gitTask);
                 await Shell.Git.Add($"D{day:00}/");
                 gitTask.Next(ctx);
-                await Shell.Git.Commit($"D{day:00}/{p}");
+                await Shell.Git.Commit($"D{day:00}/{part}");
                 gitTask.Next(ctx);
                 await Shell.VsCode.OpenInExistingWindow([$"D{day:00}/test1.json"], wait: true);
                 await Shell.Git.Add($"D{day:00}/");
                 gitTask.Next(ctx);
-                if (p == 3)
+                if (part == 3)
                 {
                     await Shell.Git.Checkout("main");
                     await Shell.Git.Merge($"days/{year}/{day:00}", ff: false);
@@ -176,7 +176,7 @@ app.AddCommand("test", ([Argument] int year, [Argument] int day, [Argument] int?
 
         var type = Assembly.GetEntryAssembly()!.GetType($"Y{year}.D{day:00}.Solution");
         var solution = (ISolution)Activator.CreateInstance(type!)!;
-        RunPart(year, day, p, type!, solution, input);
+        TestPart(year, day, p, type!, solution, input);
     }
     else
     {
@@ -184,19 +184,19 @@ app.AddCommand("test", ([Argument] int year, [Argument] int day, [Argument] int?
         var type = Assembly.GetEntryAssembly()!.GetType($"Y{year}.D{day:00}.Solution");
         var solution = (ISolution)Activator.CreateInstance(type!)!;
         for (p = 1; p <= input.Length; p++)
-            if (input[p - 1] is { } a)
-                RunPart(year, day, p, type!, solution, a);
+            if (input[p - 1] is { } i)
+                TestPart(year, day, p, type!, solution, i);
     }
 
-    static void RunPart(int year, int day, int p, Type type, ISolution solution, Part a)
+    static void TestPart(int year, int day, int p, Type type, ISolution solution, Part part)
     {
         var addFinalLF = type!.GetMethod($"Solve{p}")!.CustomAttributes.Any(a => a.AttributeType == typeof(AddFinalLineFeedAttribute));
-        var input1 = addFinalLF ? a.Input + "\n" : a.Input;
+        var input1 = addFinalLF ? part.Input + "\n" : part.Input;
         var startTime = TimeProvider.System.GetTimestamp();
         var output = solution.Solve(p, input1);
         Console.WriteLine(TimeProvider.System.GetElapsedTime(startTime));
         Console.Write($"Solving Y{year}D{day:00}P{p} : ");
-        AnsiConsole.MarkupLine(PrintResult(output, a.Answers[p - 1]));
+        AnsiConsole.MarkupLine(PrintResult(output, part.Answers[p - 1]));
     }
 });
 
