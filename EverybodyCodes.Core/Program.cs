@@ -266,7 +266,7 @@ static async Task New([Argument] int year, [Option('f')]string? folder, [Option(
     ((JArray)json["inputs"]!)[0].Remove();
     File.WriteAllText(Path.Combine(vscode.FullName, tasks.Name), json.ToString());
     File.WriteAllText(Path.Combine(vscode.FullName, extensions.Name), extensions.ReadToEnd());
-    File.WriteAllText(Path.Combine(vscode.FullName, settings.Name), settings.ReadToEnd());
+    File.WriteAllText(Path.Combine(vscode.FullName, settings.Name), settings.ReadToEnd().Replace("EverybodyCodes.sln", $"{Path.GetDirectoryName(Environment.CurrentDirectory)}.sln"));
 
     await Shell.Git.Add(".");
     await Shell.Git.Commit(year.ToString(), quiet: false);

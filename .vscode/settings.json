@@ -9,4 +9,5 @@
         "**/bin": true,
         "**/obj": true,
     },
+    "dotnet.defaultSolution": "EverybodyCodes.sln",
 }
