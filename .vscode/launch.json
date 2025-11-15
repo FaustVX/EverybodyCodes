@@ -42,9 +42,7 @@
         "test",
         "2025",
         "${input:day}",
-        "${input:part}",
-        "--file",
-        "${input:file}"
+        "${input:part}"
       ],
       "cwd": "${workspaceFolder}",
       "console": "integratedTerminal",
@@ -61,9 +59,7 @@
       "args": [
         "test",
         "2025",
-        "${input:day}",
-        "--file",
-        "${input:file}"
+        "${input:day}"
       ],
       "cwd": "${workspaceFolder}",
       "console": "integratedTerminal",
@@ -125,19 +121,6 @@
       "args": {
         "id": "session",
         "description": "Session cookie"
-      }
-    },
-    {
-      "id": "file",
-      "type": "command",
-      "command": "launch-file-picker.pick",
-      "args": {
-        "options": {
-          "title": "Test file path",
-          "filterRegExp": "test.*",
-          "filterExt": ".json",
-          "canChangeFolder": true
-        }
       }
     }
   ]
