@@ -58,17 +58,18 @@ public sealed record Me(string Name, int Seed, ImmutableDictionary<int, object?>
         ..keys.Key3 is {} ? [new(this, year, day, 3, DecryptStringFromBytes_Aes(input[3], keys[3, false], keys[3, true]), answers)] : ReadOnlySpan<Part>.Empty];
     }
 
-    public static Part? GetTestPart(int year, int day, int part, string file)
-    => GetTestParts(year, day, file)[part - 1];
+    public static IEnumerable<Part> GetTestPart(int year, int day, int part)
+    => GetTestParts(year, day)[part - 1];
 
-    public static Part?[] GetTestParts(int year, int day, string file)
+    public static IEnumerable<Part>[] GetTestParts(int year, int day)
     {
-        var input = JsonSerializer.Deserialize<TestInput>(File.ReadAllText(Path.Combine($"D{day:00}", file)))!;
-        ImmutableArray<string> answer = [input[1]?.answer!, input[2]?.answer!, input[3]?.answer!];
+        var input = JsonSerializer.Deserialize<TestInput>(File.ReadAllText(Path.Combine($"D{day:00}", "test.json")))!;
+        ImmutableArray<IEnumerable<string>> answer = [input[1].Select(static i => i.answer), input[2].Select(static i => i.answer), input[3].Select(static i => i.answer)];
 
-        return [input[1] is {} i1 ? new(null!, year, day, 1, i1.input, answer) : null,
-        input[2] is {} i2 ? new(null!, year, day, 2, i2.input, answer) : null,
-        input[3] is {} i3 ? new(null!, year, day, 3, i3.input, answer) : null];
+        var p1 = input[1].Select(i => new Part(null!, year, day, 1, i.input, [i.answer]));
+        var p2 = input[2].Select(i => new Part(null!, year, day, 2, i.input, [i.answer]));
+        var p3 = input[3].Select(i => new Part(null!, year, day, 3, i.input, [i.answer]));
+        return [p1, p2, p3];
     }
 
     static async Task<string> GetJsonAsync(Me me, int year, int day, string endpoint, string? filename = null)
@@ -147,17 +148,19 @@ public sealed class Solution : ISolution
 
         static void CreateTestFile(int day)
         {
-            var path = Path.Combine($"D{day:00}", "test1.json");
+            var path = Path.Combine($"D{day:00}", "test.json");
             if (File.Exists(path))
                 return;
             File.WriteAllText(path, """
 {
-    "1": {
-        "input": "",
-        "answer": ""
-    },
-    "2": null,
-    "3": null
+    "1": [
+        {
+            "input": "",
+            "answer": ""
+        }
+    ],
+    "2": [],
+    "3": []
 }
 
 """);
@@ -201,10 +204,10 @@ public sealed class Solution : ISolution
         }
     }
 
-    private sealed record TestInput([property: JsonPropertyName("1")] TestInput.Part? A, [property: JsonPropertyName("2")] TestInput.Part? B, [property: JsonPropertyName("3")] TestInput.Part? C)
+    private sealed record TestInput([property: JsonPropertyName("1")] IEnumerable<TestInput.Part> A, [property: JsonPropertyName("2")] IEnumerable<TestInput.Part> B, [property: JsonPropertyName("3")] IEnumerable<TestInput.Part> C)
     {
         /// <param name="index">1-based indexing</param>
-        public Part? this[int index] => index switch
+        public IEnumerable<Part> this[int index] => index switch
         {
             1 => A,
             2 => B,

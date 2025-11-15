@@ -76,7 +76,7 @@ static async Task Run([Argument] int year, [Argument] int day, [Argument] int? p
                 gitTask.Next(ctx);
                 await Shell.Git.Commit($"D{day:00}/{part}");
                 gitTask.Next(ctx);
-                await Shell.VsCode.OpenInExistingWindow([$"D{day:00}/test1.json"], wait: true);
+                await Shell.VsCode.OpenInExistingWindow([$"D{day:00}/test.json"], wait: true);
                 await Shell.Git.Add($"D{day:00}/");
                 gitTask.Next(ctx);
                 if (part == 3)
@@ -136,7 +136,7 @@ static async Task Get([Argument] int year, [Argument] int day, [Option('s')] str
             getInputTask.NextTask(ctx, gitTask);
             await Shell.Git.Checkout($"days/{year}/{day:00}", create: true);
             gitTask.Next(ctx);
-            await Shell.VsCode.OpenInExistingWindow([$"D{day:00}/Solution.cs", $"D{day:00}/test1.json"], wait: false);
+            await Shell.VsCode.OpenInExistingWindow([$"D{day:00}/Solution.cs", $"D{day:00}/test.json"], wait: false);
             await Shell.VsCode.OpenInExistingWindow([$"D{day:00}/input.json"], wait: true);
             gitTask.Next(ctx);
             await Shell.Git.Add($"D{day:00}/");
@@ -169,29 +169,25 @@ static async Task Get([Argument] int year, [Argument] int day, [Option('s')] str
         }
     });
 
-static void Test([Argument] int year, [Argument] int day, [Argument] int? part, [Option('f')]string file)
+static void Test([Argument] int year, [Argument] int day, [Argument] int? part)
 {
     Globals.IsTest = true;
-    Console.WriteLine("Test file: " + Path.GetRelativePath(Path.GetFullPath($"D{day:00}"), file));
+    Console.WriteLine("Test file: " + Path.GetRelativePath(Path.GetFullPath($"D{day:00}"), "test.json"));
     if (part is int p)
     {
-        if (Me.GetTestPart(year, day, p, file) is not {} input)
-        {
-            Console.WriteLine($"The part {p} in test file is null");
-            return;
-        }
-
+        var parts = Me.GetTestPart(year, day, p);
         var type = Assembly.GetEntryAssembly()!.GetType($"Y{year}.D{day:00}.Solution");
         var solution = (ISolution)Activator.CreateInstance(type!)!;
-        TestPart(year, day, p, type!, solution, input);
+        foreach (var i in parts)
+            TestPart(year, day, p, type!, solution, i);
     }
     else
     {
-        var input = Me.GetTestParts(year, day, file);
+        var input = Me.GetTestParts(year, day);
         var type = Assembly.GetEntryAssembly()!.GetType($"Y{year}.D{day:00}.Solution");
         var solution = (ISolution)Activator.CreateInstance(type!)!;
         for (p = 1; p <= input.Length; p++)
-            if (input[p - 1] is { } i)
+            foreach (var i in input[p - 1])
                 TestPart(year, day, p, type!, solution, i);
     }
 
@@ -203,7 +199,7 @@ static void Test([Argument] int year, [Argument] int day, [Argument] int? part, 
         var output = solution.Solve(p, input1);
         Console.WriteLine(TimeProvider.System.GetElapsedTime(startTime));
         Console.Write($"Solving Y{year}D{day:00}P{p} : ");
-        AnsiConsole.MarkupLine(PrintResult(output, part.Answers[p - 1]));
+        AnsiConsole.MarkupLine(PrintResult(output, part.Answers[0]));
     }
 };
 
