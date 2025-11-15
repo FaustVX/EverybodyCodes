@@ -23,8 +23,8 @@ public static class Shell
 
     public static class Git
     {
-        public static Task Commit(string message, params ReadOnlySpan<string> args)
-        => StartAsync("git", ["commit", "-m", message, ..args]);
+        public static Task Commit(string message, bool quiet = true, params ReadOnlySpan<string> args)
+        => StartAsync("git", ["commit", Expand(quiet, "--quiet"), "-m", message, ..args]);
         public static Task Add(params ReadOnlySpan<string> args)
         => StartAsync("git", ["add", ..args]);
         public static Task Init(params ReadOnlySpan<string> args)
@@ -43,14 +43,14 @@ public static class Shell
             public static Task Add(string? branch, string folder, bool orphan = false, params ReadOnlySpan<string> args)
             => StartAsync("git", ["worktree", "add", ..branch is string b ? ["-b", branch] : Array.Empty<string>(), Expand(orphan, "--orphan"), folder, ..args]);
         }
-        public static Task Checkout(string branch, bool create = false, params ReadOnlySpan<string> args)
-        => StartAsync("git", ["checkout", ..args, Expand(create, "-b"), branch]);
+        public static Task Checkout(string branch, bool create = false, bool quiet = true, params ReadOnlySpan<string> args)
+        => StartAsync("git", ["checkout", Expand(quiet, "--quiet"), ..args, Expand(create, "-b"), branch]);
 
-        public static Task Merge(ReadOnlySpan<string> branches, bool? ff = null, params ReadOnlySpan<string> args)
-        => StartAsync("git", ["merge", ..args, Expand(ff, "--ff", "--no-ff"), ..branches]);
+        public static Task Merge(ReadOnlySpan<string> branches, bool? ff = null, bool quiet = true, params ReadOnlySpan<string> args)
+        => StartAsync("git", ["merge", Expand(quiet, "--quiet"), ..args, Expand(ff, "--ff", "--no-ff"), ..branches]);
 
-        public static Task Merge(string branch, bool? ff = null, params ReadOnlySpan<string> args)
-        => Merge([branch], ff, args);
+        public static Task Merge(string branch, bool? ff = null, bool quiet = true, params ReadOnlySpan<string> args)
+        => Merge([branch], ff, quiet, args);
     }
 
     public static class Dotnet

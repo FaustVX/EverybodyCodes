@@ -218,7 +218,7 @@ static async Task New([Argument] int year, [Option('f')]string? folder, [Option(
     }
     else
     {
-        await Shell.Git.Worktree.Add($"years/{year}", worktree, isOrphan: true);
+        await Shell.Git.Worktree.Add($"years/{year}", worktree, orphan: true);
         Environment.CurrentDirectory = worktree;
     }
 
@@ -269,7 +269,7 @@ static async Task New([Argument] int year, [Option('f')]string? folder, [Option(
     File.WriteAllText(Path.Combine(vscode.FullName, settings.Name), settings.ReadToEnd());
 
     await Shell.Git.Add(".");
-    await Shell.Git.Commit(year.ToString());
+    await Shell.Git.Commit(year.ToString(), quiet: false);
     await Shell.VsCode.OpenInNewWindow(["./"]);
 };
 
