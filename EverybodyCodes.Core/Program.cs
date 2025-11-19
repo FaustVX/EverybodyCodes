@@ -191,8 +191,8 @@ static void Test([Argument] int year, [Argument] int day, [Argument] int? part)
         var parts = Me.GetTestPart(year, day, p);
         var type = Assembly.GetEntryAssembly()!.GetType($"Y{year}.D{day:00}.Solution");
         var solution = (ISolution)Activator.CreateInstance(type!)!;
-        foreach (var i in parts)
-            TestPart(year, day, p, type!, solution, i);
+        foreach (var i in parts.Index())
+            TestPart(year, day, p, type!, solution, i.Item, i.Index + 1);
     }
     else
     {
@@ -200,18 +200,18 @@ static void Test([Argument] int year, [Argument] int day, [Argument] int? part)
         var type = Assembly.GetEntryAssembly()!.GetType($"Y{year}.D{day:00}.Solution");
         var solution = (ISolution)Activator.CreateInstance(type!)!;
         for (p = 1; p <= input.Length; p++)
-            foreach (var i in input[p - 1])
-                TestPart(year, day, p, type!, solution, i);
+            foreach (var i in input[p - 1].Index())
+                TestPart(year, day, p, type!, solution, i.Item, i.Index + 1);
     }
 
-    static void TestPart(int year, int day, int p, Type type, ISolution solution, Part part)
+    static void TestPart(int year, int day, int p, Type type, ISolution solution, Part part, int testIndex)
     {
         var addFinalLF = type!.GetMethod($"Solve{p}")!.CustomAttributes.Any(a => a.AttributeType == typeof(AddFinalLineFeedAttribute));
         var input1 = addFinalLF ? part.Input + "\n" : part.Input;
         var startTime = TimeProvider.System.GetTimestamp();
         var output = solution.Solve(p, input1);
         Console.WriteLine(TimeProvider.System.GetElapsedTime(startTime));
-        AnsiConsole.Markup($"Solving Y[red]{year}[/]D[green]{day:00}[/]P{PartColor(p)} : ");
+        AnsiConsole.Markup($"Solving Y[red]{year}[/]D[green]{day:00}[/]P{PartColor(p)}{$"/[gray]{testIndex}[/]"} : ");
         AnsiConsole.MarkupLine(PrintResult(output, part.Answers[0]));
     }
 };
