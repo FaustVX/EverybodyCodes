@@ -128,6 +128,13 @@ static async Task Get([Argument] int year, [Argument] int day, [Option('s')] str
     )
     .StartAsync(async ctx =>
     {
+        var branch = await Shell.Git.RevParse("HEAD", abbrevRef: true);
+        if (!branch.StartsWith("years"))
+        {
+            AnsiConsole.MarkupLineInterpolated($"wrong branch, should be [blue]years/{year}[/], currently [red]{branch.TrimEnd('\n')}[/]");
+            return;
+        }
+
         var getInfoTask = ctx.AddTask("Getting Infos", maxValue: 1, autoStart: true);
         getInfoTask.IsIndeterminate = true;
         var getInputTask = ctx.AddTask("Getting input", maxValue: 1, autoStart: false);
@@ -138,10 +145,6 @@ static async Task Get([Argument] int year, [Argument] int day, [Option('s')] str
             var me = await Me.CreateAsync(session);
             getInfoTask.NextTask(ctx, getInputTask);
             var input = await me.GetInputAsync(year, day);
-            // var getDescriptionTask = ctx.AddTask("Getting description", maxValue: 1, autoStart: false);
-            // getDescriptionTask.IsIndeterminate = true;
-            // getInputTask.NextTask(ctx, getDescriptionTask);
-            // var description = await me.GetDescriptionAsync(year, day);
             var gitTask = ctx.AddTask("Git commit", maxValue: 4, autoStart: false);
             getInputTask.NextTask(ctx, gitTask);
             await Shell.Git.Checkout($"days/{year}/{day:00}", create: true);

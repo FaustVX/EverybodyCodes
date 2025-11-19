@@ -7,8 +7,27 @@ public static class Shell
     public static Task StartAsync(string cmd, params ReadOnlySpan<string> args)
     => Process.Start(cmd, [..args])!.WaitForExitAsync();
 
-    public static void Start(string cmd, params ReadOnlySpan<string> args)
-    => Process.Start(cmd, [..args])!.WaitForExit();
+    public static Task<string> StartOutputAsync(string cmd, params ReadOnlySpan<string> args)
+    {
+        var psi = new ProcessStartInfo(cmd, [.. args])
+        {
+            UseShellExecute = false,
+            RedirectStandardOutput = true,
+        };
+        return Execute(psi);
+
+        static async Task<string> Execute(ProcessStartInfo psi)
+        {
+            using var process = new Process()
+            {
+                StartInfo = psi,
+            };
+            process.Start();
+            var output = process.StandardOutput.ReadToEnd();
+            await process.WaitForExitAsync();
+            return output;
+        }
+    }
 
     private static string Expand(bool b, string @true = "", string @false = "")
     => b ? @true : @false;
@@ -51,6 +70,9 @@ public static class Shell
 
         public static Task Merge(string branch, bool? ff = null, bool quiet = true, params ReadOnlySpan<string> args)
         => Merge([branch], ff, quiet, args);
+
+        public static Task<string> RevParse(string @ref, bool abbrevRef = false)
+        => StartOutputAsync("git", ["rev-parse", Expand(abbrevRef, "--abbrev-ref"), @ref]);
     }
 
     public static class Dotnet
