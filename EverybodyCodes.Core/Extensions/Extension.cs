@@ -1,6 +1,6 @@
-using System.Collections;
 using System.Numerics;
 using CommunityToolkit.HighPerformance;
+using ZLinq;
 
 namespace EverybodyCodes.Core.Extensions;
 
@@ -19,37 +19,23 @@ public static partial class Extension
         }
     }
 
+    extension<T>(Span<T> span)
+    where T : unmanaged
+    {
+        public Span2D<T> AsSpan2D(T delimitor, bool skipLastColumn = true)
+        {
+            var s = span.AsSpan2D(span.Count(delimitor), System.MemoryExtensions.IndexOf(span, delimitor) + 1);
+            if (skipLastColumn)
+                return s[.., ..^1];
+            return s;
+        }
+    }
+
     extension<T>(ReadOnlySpan2D<T> span)
     where T : unmanaged
     {
         public RowsEnumerable<T> GetRows()
         => new(span);
-    }
-
-    public readonly ref struct RowsEnumerable<T>(ReadOnlySpan2D<T> span2d)
-    {
-        private readonly ReadOnlySpan2D<T> _span2D = span2d;
-
-        public readonly Enumerator GetEnumerator()
-        => new(_span2D);
-
-        public ref struct Enumerator(ReadOnlySpan2D<T> span2d) : IEnumerator<ReadOnlySpan<T>>
-        {
-            private readonly ReadOnlySpan2D<T> _span2D = span2d;
-            private int _i = -1;
-            public readonly ReadOnlySpan<T> Current
-            => _span2D.GetRowSpan(_i);
-
-            readonly object IEnumerator.Current
-            => Current.ToString();
-
-            public readonly void Dispose() { }
-
-            public bool MoveNext()
-            => ++_i < _span2D.Height;
-
-            public readonly void Reset() { }
-        }
     }
 
     extension<T>(T n)
@@ -85,30 +71,14 @@ public static partial class Extension
         }
     }
 
-    extension(System.MemoryExtensions.SpanSplitEnumerator<char> enumerator)
+    extension<T>(T left)
+    where T : IModulusOperators<T, T, T>, IAdditionOperators<T, T, T>, IAdditiveIdentity<T, T>, IComparisonOperators<T, T, bool>
     {
-        public SpanSplitCastEnumerator<T> ParseTo<T>()
-        where T : ISpanParsable<T>
-        => new(enumerator.GetEnumerator(), T.Parse);
-        public SpanSplitCastEnumerator<T> ParseTo<T>(Func<ReadOnlySpan<char>, IFormatProvider?, T> parser)
-        where T : allows ref struct
-        => new(enumerator.GetEnumerator(), parser);
-        public SpanSplitCastEnumerator<ReadOnlySpan<char>> ToSpans()
-        => new(enumerator.GetEnumerator(), static (s, _) => s);
-    }
-
-    public ref struct SpanSplitCastEnumerator<T>(System.MemoryExtensions.SpanSplitEnumerator<char> enumerator, Func<ReadOnlySpan<char>, IFormatProvider?, T> parser)
-    where T : allows ref struct
-    {
-        private System.MemoryExtensions.SpanSplitEnumerator<char> _enumerator = enumerator;
-
-        public readonly SpanSplitCastEnumerator<T> GetEnumerator()
-        => this;
-
-        public readonly T Current
-        => parser(_enumerator.Source[_enumerator.Current], null);
-
-        public bool MoveNext()
-        => _enumerator.MoveNext();
+        public T EuclideanModulo(T right)
+        {
+            if (left >= T.AdditiveIdentity)
+                return left % right;
+            return (left % right + right) % right;
+        }
     }
 }
