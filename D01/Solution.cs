@@ -53,15 +53,4 @@ file static class Ext
         public void SwapWith(ref T other)
         => (value, other) = (other, value);
     }
-
-    extension<T>(T left)
-    where T : IModulusOperators<T, T, T>, IAdditionOperators<T, T, T>, IAdditiveIdentity<T, T>, IComparisonOperators<T, T, bool>
-    {
-        public T EuclideanModulo(T right)
-        {
-            if (left >= T.AdditiveIdentity)
-                return left % right;
-            return (left % right + right) % right;
-        }
-    }
 }
