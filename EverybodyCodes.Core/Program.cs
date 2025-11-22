@@ -42,11 +42,13 @@ static async Task Run([Argument] int year, [Argument] int day, [Argument] int? p
             getInputTask.NextTask(ctx, instanciateTask);
             var type = Assembly.GetEntryAssembly()!.GetType($"Y{year}.D{day:00}.Solution");
             var solution = (ISolution)Activator.CreateInstance(type!)!;
+            PartResponse? response = default;
             if (part is int p)
-                await RunPart(year, day, input, type!, solution, p, ctx, instanciateTask, session);
+                response = await RunPart(year, day, input, type!, solution, p, ctx, instanciateTask, session);
             else
                 for (p = 1; p <= input.Length; p++)
-                    await RunPart(year, day, input, type!, solution, p, ctx, instanciateTask, session);
+                    response = await RunPart(year, day, input, type!, solution, p, ctx, instanciateTask, session);
+            AnsiConsole.WriteLine(response?.ToString() ?? "");
         }
         catch (Exception ex)
         {
@@ -54,13 +56,13 @@ static async Task Run([Argument] int year, [Argument] int day, [Argument] int? p
             return;
         }
 
-        static async Task RunPart(int year, int day, Part[] parts, Type type, ISolution solution, int part, ProgressContext ctx, ProgressTask instanciateTask, string session)
+        static async Task<PartResponse?> RunPart(int year, int day, Part[] parts, Type type, ISolution solution, int part, ProgressContext ctx, ProgressTask instanciateTask, string session)
         {
             var me = await Me.CreateAsync(session);
             if (me.PenaltySpan.TotalSeconds > 0 && parts[part - 1].Answers.Length < part)
             {
                 await Wait(ctx, session, instanciateTask);
-                return;
+                return null;
             }
             instanciateTask.Next(ctx);
             var addFinalLF = type.GetMethod($"Solve{part}")!.CustomAttributes.Any(a => a.AttributeType == typeof(AddFinalLineFeedAttribute));
@@ -100,7 +102,7 @@ static async Task Run([Argument] int year, [Argument] int day, [Argument] int? p
                 sendingTask.Next(ctx);
                 sendingTask.StopTask();
             }
-            Console.WriteLine(response);
+            return response;
 
             static async Task Wait(ProgressContext ctx, string session, ProgressTask previousTask)
             {
