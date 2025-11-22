@@ -14,23 +14,8 @@ public sealed class Solution : ISolution
         var birds = (stackalloc int[input.Count('\n') + 1]);
         input.Split('\n').ParseTo<int>().AsValueEnumerable().CopyTo(birds);
         var rounds = Phase1(birds);
-        Phase2(birds, maxDepth: 10 - rounds);
+        Phase2(birds, maxDepth: (int)(10 - rounds));
         return Checksum(birds).ToString();
-
-        static int Phase1(Span<int> birds)
-        {
-            var moved = false;
-            for (var i = 1; i < birds.Length; i++)
-            {
-                if (birds[i - 1] > birds[i])
-                {
-                    moved = true;
-                    birds[i - 1]--;
-                    birds[i]++;
-                }
-            }
-            return moved ? 1 + Phase1(birds) : 0;
-        }
 
         static void Phase2(Span<int> birds, int maxDepth)
         {
@@ -56,10 +41,53 @@ public sealed class Solution : ISolution
             .Sum(b => (b.Index + 1) * b.Item);
     }
 
+    static long Phase1(Span<int> birds)
+    {
+        var rounds = 0L;
+        for (var moved = true; moved; rounds++)
+        {
+            moved = false;
+            for (var i = 1; i < birds.Length; i++)
+            {
+                if (birds[i - 1] > birds[i])
+                {
+                    moved = true;
+                    birds[i - 1]--;
+                    birds[i]++;
+                }
+            }
+        }
+        return rounds - 1;
+    }
+
     // https://everybody.codes/event/2025/quests/11#:~:text=Part%20II
     public string Solve2(ReadOnlySpan<char> input)
     {
-        throw new NotImplementedException();
+        var birds = (stackalloc int[input.Count('\n') + 1]);
+        input.Split('\n').ParseTo<int>().AsValueEnumerable().CopyTo(birds);
+        long rounds = Phase1(birds);
+        rounds += Phase2(birds);
+        return rounds.ToString();
+
+        static long Phase2(Span<int> birds)
+        {
+            var rounds = 0;
+            for (var moved = true; moved; rounds++)
+            {
+                moved = false;
+                for (var i = 1; i < birds.Length; i++)
+                {
+                    if (birds[i - 1] < birds[i])
+                    {
+                        moved = true;
+                        birds[i - 1]++;
+                        birds[i]--;
+                    }
+                }
+            }
+
+            return rounds - 1;
+        }
     }
 
     // https://everybody.codes/event/2025/quests/11#:~:text=Part%20III
