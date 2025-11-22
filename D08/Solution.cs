@@ -10,7 +10,7 @@ public sealed class Solution : ISolution
     // https://everybody.codes/event/2025/quests/8#:~:text=Part%20I
     public string Solve1(ReadOnlySpan<char> input)
     {
-        var halfLength = (Globals.IsTest ? (int)Globals.Args!["length"] : 32) / 2;
+        var halfLength = (Globals.IsTest ? Globals.Args!.Get<int>() : 32) / 2;
         var nails = input.Split(',').ParseTo<int>();
         nails.MoveNext();
         var last = nails.Current;
@@ -60,7 +60,7 @@ public sealed class Solution : ISolution
                 last = nail;
             }
         }
-        var length = Globals.IsTest ? (int)Globals.Args!["length"] : 256;
+        var length = Globals.IsTest ? Globals.Args!.Get<int>() : 256;
         var max = 0L;
         for (var i = 1; i <= length; i++)
             for (var j = i + 1; j <= length; j++)
