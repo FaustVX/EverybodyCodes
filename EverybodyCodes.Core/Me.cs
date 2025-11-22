@@ -64,7 +64,7 @@ public sealed record Me(string Name, int Seed, ImmutableDictionary<int, object?>
 
     public static IEnumerable<Part>[] GetTestParts(int year, int day)
     {
-        var input = JsonSerializer.Deserialize<TestInput>(File.ReadAllText(Path.Combine($"D{day:00}", "test.json")))!;
+        var input = JsonSerializer.Deserialize<TestInput>(File.ReadAllText(Path.Combine($"D{day:00}", "test.json")), TestInput.Part.Options)!;
 
         var p1 = input[1].Select(i => CreatePart(year, day, 1, i));
         var p2 = input[2].Select(i => CreatePart(year, day, 2, i));
@@ -223,8 +223,46 @@ public sealed class Solution : ISolution
         };
 
 #pragma warning disable IDE1006 // Naming Styles
-        public readonly record struct Part(string input, string answer, IReadOnlyDictionary<string, string>? args);
+        public readonly record struct Part(string input, string answer, IReadOnlyDictionary<string, object>? args)
 #pragma warning restore IDE1006 // Naming Styles
+        {
+            public static JsonSerializerOptions Options = new(JsonSerializerDefaults.General)
+            {
+                AllowTrailingCommas = true,
+                Converters =
+                {
+                    new ObjectConverter(),
+                }
+            };
+
+            private sealed class ObjectConverter : JsonConverter<object>
+            {
+                public override object? Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
+                {
+                    switch (reader.TokenType)
+                    {
+                        case JsonTokenType.StartObject:
+                            return JsonSerializer.Deserialize<IReadOnlyDictionary<string, object>>(ref reader, options);
+                        case JsonTokenType.StartArray:
+                            return JsonSerializer.Deserialize<IReadOnlyList<object>>(ref reader, options);
+                        case JsonTokenType.String:
+                            return JsonSerializer.Deserialize<string>(ref reader, options);
+                        case JsonTokenType.Number:
+                            if (reader.TryGetInt32(out var i))
+                                return i;
+                            if (reader.TryGetInt64(out var l))
+                                return l;
+                            return reader.GetDecimal();
+                        case JsonTokenType.Null:
+                            return null;
+                    }
+                    throw new NotImplementedException();
+                }
+
+                public override void Write(Utf8JsonWriter writer, object value, JsonSerializerOptions options)
+                { }
+            }
+        }
     }
 
     readonly record struct Key(string? Key1, string? Answer1, string? Key2, string? Answer2, string? Key3, string? Answer3)
