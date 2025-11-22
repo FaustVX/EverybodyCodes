@@ -1,3 +1,4 @@
+using System.Collections.Frozen;
 using System.Collections.Immutable;
 using System.Net;
 using System.Net.Http.Json;
@@ -64,12 +65,17 @@ public sealed record Me(string Name, int Seed, ImmutableDictionary<int, object?>
     public static IEnumerable<Part>[] GetTestParts(int year, int day)
     {
         var input = JsonSerializer.Deserialize<TestInput>(File.ReadAllText(Path.Combine($"D{day:00}", "test.json")))!;
-        ImmutableArray<IEnumerable<string>> answer = [input[1].Select(static i => i.answer), input[2].Select(static i => i.answer), input[3].Select(static i => i.answer)];
 
-        var p1 = input[1].Select(i => new Part(null!, year, day, 1, i.input, [i.answer]));
-        var p2 = input[2].Select(i => new Part(null!, year, day, 2, i.input, [i.answer]));
-        var p3 = input[3].Select(i => new Part(null!, year, day, 3, i.input, [i.answer]));
+        var p1 = input[1].Select(i => CreatePart(year, day, 1, i));
+        var p2 = input[2].Select(i => CreatePart(year, day, 2, i));
+        var p3 = input[3].Select(i => CreatePart(year, day, 3, i));
         return [p1, p2, p3];
+
+        static Part CreatePart(int year, int day, int part, TestInput.Part i)
+        {
+            Globals.Args = i.args?.ToFrozenDictionary();
+            return new Part(null!, year, day, part, i.input, [i.answer]);
+        }
     }
 
     static async Task<string> GetJsonAsync(Me me, int year, int day, string endpoint, string? filename = null)
@@ -156,7 +162,8 @@ public sealed class Solution : ISolution
     "1": [
         {
             "input": "",
-            "answer": ""
+            "answer": "",
+            "args": null
         }
     ],
     "2": [],
@@ -215,7 +222,7 @@ public sealed class Solution : ISolution
             _ => throw new IndexOutOfRangeException(),
         };
 
-        public readonly record struct Part(string input, string answer);
+        public readonly record struct Part(string input, string answer, IReadOnlyDictionary<string, string>? args);
     }
 
     readonly record struct Key(string? Key1, string? Answer1, string? Key2, string? Answer2, string? Key3, string? Answer3)
