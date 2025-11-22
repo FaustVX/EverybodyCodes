@@ -92,7 +92,15 @@ public sealed class Solution : ISolution
 
     // https://everybody.codes/event/2025/quests/11#:~:text=Part%20III
     public string Solve3(ReadOnlySpan<char> input)
-    => Solve2(input);
+    {
+        var birds = (stackalloc long[input.Count('\n') + 1]);
+        input.Split('\n').ParseTo<long>().AsValueEnumerable().CopyTo(birds);
+        var avg = birds.AsValueEnumerable().Average();
+        return birds.AsValueEnumerable()
+            .Where(b => b < avg)
+            .Sum(b => avg - b)
+            .ToString();
+    }
 }
 
 file static class Ext
