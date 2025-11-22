@@ -222,7 +222,9 @@ public sealed class Solution : ISolution
             _ => throw new IndexOutOfRangeException(),
         };
 
+#pragma warning disable IDE1006 // Naming Styles
         public readonly record struct Part(string input, string answer, IReadOnlyDictionary<string, string>? args);
+#pragma warning restore IDE1006 // Naming Styles
     }
 
     readonly record struct Key(string? Key1, string? Answer1, string? Key2, string? Answer2, string? Key3, string? Answer3)
