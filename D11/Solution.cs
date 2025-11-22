@@ -11,13 +11,13 @@ public sealed class Solution : ISolution
     // https://everybody.codes/event/2025/quests/11#:~:text=Part%20I
     public string Solve1(ReadOnlySpan<char> input)
     {
-        var birds = (stackalloc int[input.Count('\n') + 1]);
-        input.Split('\n').ParseTo<int>().AsValueEnumerable().CopyTo(birds);
+        var birds = (stackalloc long[input.Count('\n') + 1]);
+        input.Split('\n').ParseTo<long>().AsValueEnumerable().CopyTo(birds);
         var rounds = Phase1(birds);
         Phase2(birds, maxDepth: (int)(10 - rounds));
         return Checksum(birds).ToString();
 
-        static void Phase2(Span<int> birds, int maxDepth)
+        static void Phase2(Span<long> birds, int maxDepth)
         {
             if (maxDepth <= 0)
                 return;
@@ -35,13 +35,13 @@ public sealed class Solution : ISolution
                 Phase2(birds, maxDepth - 1);
         }
 
-        static int Checksum(ReadOnlySpan<int> birds)
+        static long Checksum(ReadOnlySpan<long> birds)
         => birds.AsValueEnumerable()
             .Index()
             .Sum(b => (b.Index + 1) * b.Item);
     }
 
-    static long Phase1(Span<int> birds)
+    static long Phase1(Span<long> birds)
     {
         var rounds = 0L;
         for (var moved = true; moved; rounds++)
@@ -63,13 +63,13 @@ public sealed class Solution : ISolution
     // https://everybody.codes/event/2025/quests/11#:~:text=Part%20II
     public string Solve2(ReadOnlySpan<char> input)
     {
-        var birds = (stackalloc int[input.Count('\n') + 1]);
-        input.Split('\n').ParseTo<int>().AsValueEnumerable().CopyTo(birds);
+        var birds = (stackalloc long[input.Count('\n') + 1]);
+        input.Split('\n').ParseTo<long>().AsValueEnumerable().CopyTo(birds);
         long rounds = Phase1(birds);
         rounds += Phase2(birds);
         return rounds.ToString();
 
-        static long Phase2(Span<int> birds)
+        static long Phase2(Span<long> birds)
         {
             var rounds = 0;
             for (var moved = true; moved; rounds++)
@@ -92,9 +92,7 @@ public sealed class Solution : ISolution
 
     // https://everybody.codes/event/2025/quests/11#:~:text=Part%20III
     public string Solve3(ReadOnlySpan<char> input)
-    {
-        throw new NotImplementedException();
-    }
+    => Solve2(input);
 }
 
 file static class Ext
