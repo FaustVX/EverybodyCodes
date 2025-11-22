@@ -1,9 +1,8 @@
 {
     "1": [
         {
-            "input": "",
-            "answer": "",
-            "args": null
+            "input": "9\n1\n1\n4\n9\n6",
+            "answer": "109"
         }
     ],
     "2": [],
