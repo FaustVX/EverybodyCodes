@@ -78,21 +78,22 @@ static async Task Run([Argument] int year, [Argument] int day, [Argument] int? p
             var response = await parts[part - 1].AnswerAsync(output);
             if (response.IsCorrect && response.Time != default)
             {
-                var gitTask = ctx.AddTask("Git commit", maxValue: 4, autoStart: false);
+                var gitTask = ctx.AddTask("Git commit", maxValue: 3, autoStart: false);
                 sendingTask.NextTask(ctx, gitTask);
                 await Shell.Git.Add($"D{day:00}/");
                 gitTask.Next(ctx);
                 await Shell.Git.Commit($"D{day:00}/{part}");
                 gitTask.Next(ctx);
-                await Shell.VsCode.OpenInExistingWindow([$"D{day:00}/test.json"], wait: true);
-                await Shell.Git.Add($"D{day:00}/");
-                gitTask.Next(ctx);
                 if (part == 3)
                 {
-                    await Shell.Git.Checkout("main");
+                    await Shell.Git.Checkout($"years/{year}");
                     await Shell.Git.Merge($"days/{year}/{day:00}", ff: false);
                 }
-
+                else
+                {
+                    await Shell.VsCode.OpenInExistingWindow([$"D{day:00}/test.json"], wait: true);
+                    await Shell.Git.Add($"D{day:00}/");
+                }
                 gitTask.Next(ctx);
             }
             else if (!response.IsCorrect)
