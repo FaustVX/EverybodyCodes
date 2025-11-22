@@ -14,7 +14,27 @@
     "3": [
         {
             "input": "AABCBABCABCabcabcABCCBAACBCa",
-            "answer": "34"
+            "answer": "34",
+            "args": {
+                "repeat": "1",
+                "distance": "10"
+            }
+        },
+        {
+            "input": "AABCBABCABCabcabcABCCBAACBCa",
+            "answer": "72",
+            "args": {
+                "repeat": "2",
+                "distance": "10"
+            }
+        },
+        {
+            "input": "AABCBABCABCabcabcABCCBAACBCa",
+            "answer": "3442321",
+            "args": {
+                "repeat": "1000",
+                "distance": "1000"
+            }
         }
     ]
 }

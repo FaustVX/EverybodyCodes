@@ -35,7 +35,7 @@ public sealed class Solution : ISolution
     // https://everybody.codes/event/2025/quests/6#:~:text=Part%20III
     public string Solve3(ReadOnlySpan<char> input)
     {
-        input = string.Create(input.Length * (Globals.IsTest ? 1 : 1000), input, (s, i) =>
+        input = string.Create(input.Length * (Globals.IsTest ? int.Parse(Globals.Args!["repeat"]) : 1000), input, (s, i) =>
         {
             while (!s.IsEmpty)
             {
@@ -43,7 +43,7 @@ public sealed class Solution : ISolution
                 s = s[i.Length..];
             }
         });
-        var distance = Globals.IsTest ? 10 : 1000;
+        var distance = Globals.IsTest ? int.Parse(Globals.Args!["distance"]) : 1000;
         var total = 0;
         for (var i = 0; i < input.Length; i++)
         {
