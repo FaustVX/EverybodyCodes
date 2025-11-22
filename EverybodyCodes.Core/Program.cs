@@ -74,7 +74,6 @@ static async Task Run([Argument] int year, [Argument] int day, [Argument] int? p
                 : PrintResult(output, null);
             solvingTask.NextTask(ctx, sendingTask);
             var response = await parts[part - 1].AnswerAsync(output);
-            // Console.WriteLine(response);
             if (response.IsCorrect && response.Time != default)
             {
                 var gitTask = ctx.AddTask("Git commit", maxValue: 4, autoStart: false);
@@ -101,6 +100,7 @@ static async Task Run([Argument] int year, [Argument] int day, [Argument] int? p
                 sendingTask.Next(ctx);
                 sendingTask.StopTask();
             }
+            Console.WriteLine(response);
 
             static async Task Wait(ProgressContext ctx, string session, ProgressTask previousTask)
             {
